@@ -1,0 +1,169 @@
+plugins {
+    id 'com.jfrog.bintray' version '1.7.2'
+    id 'java'
+    id 'maven'
+    id 'maven-publish'
+    id 'com.github.ben-manes.versions' version '0.13.0'
+    id 'com.github.johnrengelman.shadow' version '2.0.1'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile project(':sox-core')
+    compile project(':sox-jda')
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+subprojects {
+    def versionObj = new Version(major: 0, minor: 1, revision: 0)
+
+    group 'com.github.natanbc'
+    version "${versionObj}"
+
+    sourceCompatibility = 1.8
+
+    task sourcesForRelease(type: Copy) {
+        from 'src/main/java'
+        into 'build/filteredSrc'
+        filter(ReplaceTokens, tokens: [
+                VERSION_MAJOR: versionObj.getMajor(),
+                VERSION_MINOR: versionObj.getMinor(),
+                VERSION_REVISION: versionObj.getRevision(),
+                COMMIT_HASH: getCommitHash()
+        ])
+    }
+
+    compileJava {
+        source = sourcesForRelease.destinationDir
+        classpath = sourceSets.main.compileClasspath
+
+        options.encoding = 'UTF-8'
+
+        options.compilerArgs << "-Xlint:unchecked"
+
+        dependsOn sourcesForRelease
+    }
+
+    jar {
+        baseName = project.name
+        manifest {
+            attributes 'Implementation-Version': version
+        }
+    }
+
+    shadowJar {
+        classifier = "withDependencies"
+    }
+
+    javadoc {
+        def dir = new File(System.getenv("JAVA_HOME"), "bin")
+        def file = new File(dir, "javadoc")
+        if(!file.isFile()) file = new File(dir, "javadoc.exe")
+        if(file.isFile()) {
+            executable = file.getAbsolutePath()
+            options.addBooleanOption('html5', true)
+        }
+        options.optionFiles new File(rootProject.projectDir, "javadoc.options")
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from "${buildDir}/filteredSrc"
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    bintray {
+        project.version = "${versionObj}"
+        user = bintrayUsername
+        key = bintrayApiKey
+        publications = ["BintrayRelease"]
+        pkg {
+            repo = 'maven'
+            name = project.name
+            licenses = ['Apache-2.0']
+            vcsUrl = 'https://github.com/natanbc/weeb4j.git'
+            publish = true
+            version {
+                name = project.version
+                released = new Date()
+            }
+        }
+    }
+
+    publishing {
+        publications {
+            BintrayRelease(MavenPublication) {
+                from components.java
+                groupId group
+                artifactId archivesBaseName
+                version version
+                artifact javadocJar
+                artifact sourcesJar
+            }
+        }
+    }
+
+    build {
+        dependsOn clean
+        dependsOn jar
+        dependsOn javadocJar
+        dependsOn sourcesJar
+        dependsOn shadowJar
+
+        dependsOn test
+
+        jar.mustRunAfter clean
+        javadocJar.mustRunAfter jar
+        sourcesJar.mustRunAfter javadocJar
+        shadowJar.mustRunAfter sourcesJar
+    }
+
+    bintrayUpload {
+        dependsOn build
+
+        onlyIf { !getProjectProperty("bintrayUsername").empty }
+        onlyIf { !getProjectProperty("bintrayApiKey").empty }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.9'
+}
+
+String getProjectProperty(String propertyName) {
+    String property = ""
+    if(hasProperty(propertyName)) {
+        property = project.properties[propertyName]
+    }
+    return property
+}
+
+static def getCommitHash() {
+    def p = Runtime.getRuntime().exec("git rev-parse HEAD")
+    p.waitFor()
+    p.getIn().text.trim()
+}
+
+class Version {
+    String major, minor, revision
+
+
+    String toString() {
+        "${major}.${minor}" + (revision == "0" ? "" : ".${revision}")
+    }
+}

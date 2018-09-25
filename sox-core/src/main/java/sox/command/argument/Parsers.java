@@ -261,4 +261,21 @@ public class Parsers {
             return Optional.of(context.result());
         };
     }
+
+    /**
+     * Returns a parser that always returns a successful result, containing
+     * the optional returned by the provided parser.
+     * <br>This method is intended for use when you don't want to unread arguments,
+     * even if parsing fails.
+     *
+     * @param parser Parser used for values.
+     * @param <T> Type of the object returned by the given parser.
+     *
+     * @return Parser that never fails, always returning a valid option.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static <T> Parser<Optional<T>> option(@Nonnull Parser<T> parser) {
+        return (c, args) -> Optional.of(parser.parse(c, args));
+    }
 }

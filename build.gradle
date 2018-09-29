@@ -89,8 +89,8 @@ subprojects {
 
     bintray {
         project.version = "${versionObj}"
-        user = bintrayUsername
-        key = bintrayApiKey
+        user = getProjectProperty("bintrayUsername")
+        key = getProjectProperty("bintrayApiKey")
         publications = ["BintrayRelease"]
         pkg {
             repo = 'maven'

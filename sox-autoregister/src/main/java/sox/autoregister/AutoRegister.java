@@ -5,6 +5,9 @@ import io.github.classgraph.ScanResult;
 import sox.Sox;
 import sox.command.AbstractCommand;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+
 /**
  * Handles finding command classes and automatically registering.
  * <br>Example:
@@ -18,18 +21,20 @@ import sox.command.AbstractCommand;
 public abstract class AutoRegister implements AutoCloseable {
     private final ScanResult result;
 
-    public AutoRegister(ScanResult result) {
+    public AutoRegister(@Nonnull ScanResult result) {
         this.result = result;
     }
 
-    public AutoRegister(ClassGraph classGraph) {
+    public AutoRegister(@Nonnull ClassGraph classGraph) {
         this(classGraph.scan());
     }
 
-    public AutoRegister(String... packages) {
+    public AutoRegister(@Nonnull String... packages) {
         this(new ClassGraph().whitelistPackages(packages));
     }
 
+    @Nonnull
+    @CheckReturnValue
     public abstract Class<? extends AbstractCommand<?>> commandClass();
 
     public void register(Sox sox) {
@@ -46,28 +51,34 @@ public abstract class AutoRegister implements AutoCloseable {
         result.close();
     }
 
-    public static AutoRegister jda() {
-        return new ForClass(jdaCommandClass());
-    }
-
-    public static AutoRegister jda(String... packages) {
+    @Nonnull
+    @CheckReturnValue
+    public static AutoRegister jda(@Nonnull String... packages) {
         return new ForClass(jdaCommandClass(), packages);
     }
 
-    public static AutoRegister jda(ClassGraph classGraph) {
+    @Nonnull
+    @CheckReturnValue
+    public static AutoRegister jda(@Nonnull ClassGraph classGraph) {
         return new ForClass(jdaCommandClass(), classGraph);
     }
 
-    public static AutoRegister jda(ScanResult result) {
+    @Nonnull
+    @CheckReturnValue
+    public static AutoRegister jda(@Nonnull ScanResult result) {
         return new ForClass(jdaCommandClass(), result);
     }
 
+    @Nonnull
+    @CheckReturnValue
     private static Class<? extends AbstractCommand<?>> jdaCommandClass() {
         return findClassOrThrow("sox.command.jda.Command");
     }
 
+    @Nonnull
+    @CheckReturnValue
     @SuppressWarnings("unchecked")
-    private static Class<? extends AbstractCommand<?>> findClassOrThrow(String name) {
+    private static Class<? extends AbstractCommand<?>> findClassOrThrow(@Nonnull String name) {
         try {
             return (Class<? extends AbstractCommand<?>>)Class.forName(name).asSubclass(AbstractCommand.class);
         } catch(ClassNotFoundException e) {
@@ -78,27 +89,24 @@ public abstract class AutoRegister implements AutoCloseable {
     public static class ForClass extends AutoRegister {
         private final Class<? extends AbstractCommand<?>> commandClass;
 
-        public ForClass(Class<? extends AbstractCommand<?>> commandClass, ScanResult result) {
+        public ForClass(@Nonnull Class<? extends AbstractCommand<?>> commandClass, ScanResult result) {
             super(result);
             this.commandClass = commandClass;
         }
 
-        public ForClass(Class<? extends AbstractCommand<?>> commandClass, ClassGraph classGraph) {
+        public ForClass(@Nonnull Class<? extends AbstractCommand<?>> commandClass, ClassGraph classGraph) {
             super(classGraph);
             this.commandClass = commandClass;
         }
 
-        public ForClass(Class<? extends AbstractCommand<?>> commandClass, String... packages) {
+        public ForClass(@Nonnull Class<? extends AbstractCommand<?>> commandClass, String... packages) {
             super(packages);
             this.commandClass = commandClass;
         }
 
-        public ForClass(Class<? extends AbstractCommand<?>> commandClass) {
-            super();
-            this.commandClass = commandClass;
-        }
-
         @Override
+        @Nonnull
+        @CheckReturnValue
         public Class<? extends AbstractCommand<?>> commandClass() {
             return commandClass;
         }

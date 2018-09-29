@@ -20,5 +20,5 @@ public interface AfterCommand<C extends AbstractContext<C>> {
      * @param context Context for the command call.
      * @param command Command called.
      */
-    void afterCommand(@Nonnull AbstractContext<C> context, @Nonnull AbstractCommand<C> command);
+    void afterCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
 }

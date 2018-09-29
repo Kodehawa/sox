@@ -25,5 +25,5 @@ public interface CommandFilter<C extends AbstractContext<C>> {
      * @return False if the command execution should be aborted.
      */
     @CheckReturnValue
-    boolean shouldRunCommand(@Nonnull AbstractContext<C> context, @Nonnull AbstractCommand<C> command);
+    boolean shouldRunCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
 }

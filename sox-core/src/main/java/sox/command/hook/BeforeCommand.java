@@ -20,5 +20,5 @@ public interface BeforeCommand<C extends AbstractContext<C>> {
      * @param context Context for the command call.
      * @param command Command being called.
      */
-    void beforeCommand(@Nonnull AbstractContext<C> context, @Nonnull AbstractCommand<C> command);
+    void beforeCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
 }

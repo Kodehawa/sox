@@ -4,5 +4,5 @@ repositories {
 
 dependencies {
     compile project(':sox-core')
-    compile 'net.dv8tion:JDA:3.8.0_428'
+    compile 'io.github.classgraph:classgraph:4.2.3'
 }

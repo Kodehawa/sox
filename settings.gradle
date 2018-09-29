@@ -1,4 +1,5 @@
 rootProject.name = 'sox'
 include 'sox-core'
 include 'sox-jda'
+include 'sox-autoregister'
 

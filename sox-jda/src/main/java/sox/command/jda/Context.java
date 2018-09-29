@@ -15,6 +15,9 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Context class used for JDA bots.
+ */
 public class Context extends AbstractContext<Context> {
     private final Message message;
 

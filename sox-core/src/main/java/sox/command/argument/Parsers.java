@@ -39,6 +39,17 @@ public class Parsers {
     }
 
     /**
+     * Returns a parser that matches floats.
+     *
+     * @return A parser that matches floats.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static Parser<Float> parseFloat() {
+        return new CatchingParser<>(Float::valueOf);
+    }
+
+    /**
      * Returns a parser that matches longs.
      *
      * @return A parser that matches longs.
@@ -47,6 +58,17 @@ public class Parsers {
     @CheckReturnValue
     public static Parser<Long> parseLong() {
         return new CatchingParser<>(Long::valueOf);
+    }
+
+    /**
+     * Returns a parser that matches doubles.
+     *
+     * @return A parser that matches doubles.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static Parser<Double> parseDouble() {
+        return new CatchingParser<>(Double::valueOf);
     }
 
     /**

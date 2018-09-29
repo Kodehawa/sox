@@ -10,6 +10,9 @@ import sox.util.MapFactory;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Default command manager for JDA bots.
+ */
 public class JDAReflectiveCommandManager extends ReflectiveCommandManager<Message, Context> {
     public JDAReflectiveCommandManager(@Nonnull Sox sox, @Nonnull MapFactory mapFactory, @Nonnull ListFactory listFactory) {
         super(sox, mapFactory, listFactory);

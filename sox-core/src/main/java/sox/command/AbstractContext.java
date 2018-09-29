@@ -189,13 +189,12 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
     @CheckReturnValue
     public <T> Optional<T> tryArgument(@Nonnull Parser<T> parser) {
         if(!arguments.hasNext()) return Optional.empty();
-        try(MarkedBlock block = arguments.marked()) {
-            Optional<T> optional = parser.parse(this);
-            if(!optional.isPresent()) {
-                block.reset();
-            }
-            return optional;
+        MarkedBlock block = arguments.marked();
+        Optional<T> optional = parser.parse(this);
+        if(!optional.isPresent()) {
+            block.reset();
         }
+        return optional;
     }
 
     /**
@@ -263,20 +262,19 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
     @CheckReturnValue
     public <T> List<T> takeUntil(Parser<T> valueParser, Parser<?> delimiter) {
         List<T> list = new ArrayList<>();
-        try(MarkedBlock block = arguments.marked()) {
+        MarkedBlock block = arguments.marked();
+        if(tryArgument(delimiter).isPresent()) {
+            block.reset();
+            return list;
+        }
+        for(Optional<T> parsed = tryArgument(valueParser); parsed.isPresent(); parsed = tryArgument(valueParser)) {
+            list.add(parsed.get());
+            block.mark();
             if(tryArgument(delimiter).isPresent()) {
                 block.reset();
                 return list;
             }
-            for(Optional<T> parsed = tryArgument(valueParser); parsed.isPresent(); parsed = tryArgument(valueParser)) {
-                list.add(parsed.get());
-                block.mark();
-                if(tryArgument(delimiter).isPresent()) {
-                    block.reset();
-                    return list;
-                }
-            }
-            return list;
         }
+        return list;
     }
 }

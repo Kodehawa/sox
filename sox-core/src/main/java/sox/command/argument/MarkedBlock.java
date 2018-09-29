@@ -1,8 +1,11 @@
 package sox.command.argument;
 
-public class MarkedBlock implements AutoCloseable {
+/**
+ * Provides a similar but superior API over {@link Arguments#mark() mark}/{@link Arguments#reset() reset},
+ * supporting nesting of mark/reset blocks without one interfering with the other.
+ */
+public class MarkedBlock {
     private final Arguments arguments;
-    private boolean shouldReset = false;
     private int offset;
 
     public MarkedBlock(Arguments arguments) {
@@ -10,22 +13,18 @@ public class MarkedBlock implements AutoCloseable {
         mark();
     }
 
+    /**
+     * Updates the reset offset. After calling this method, any resets will return to the
+     * current offset.
+     */
     public void mark() {
         this.offset = arguments.getOffset();
     }
 
+    /**
+     * Resets to the currently marked offset.
+     */
     public void reset() {
-        shouldReset = true;
-    }
-
-    public void reset(boolean shouldReset) {
-        this.shouldReset = shouldReset;
-    }
-
-    @Override
-    public void close() {
-        if(shouldReset) {
-            arguments.setOffset(offset);
-        }
+        arguments.setOffset(offset);
     }
 }

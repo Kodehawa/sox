@@ -31,6 +31,8 @@ public final class JDAParsers {
     @Nonnull
     @CheckReturnValue
     public static Parser<Member> member() {
+        //we use false because all members of the guild will be visible in the current
+        //shard, so there's no point in resolving users from other shards.
         Parser<User> userParser = user(false);
         return (abstractContext, arguments) -> {
             Context c = (Context)abstractContext;
@@ -73,7 +75,8 @@ public final class JDAParsers {
         return (abstractContext, arguments) -> {
             Context c = (Context)abstractContext;
             JDA jda = c.message().getJDA();
-            SnowflakeCacheView<User> userCache = useShardManager ? jda.asBot().getShardManager().getUserCache() : jda.getUserCache();
+            SnowflakeCacheView<User> userCache = useShardManager ?
+                    jda.asBot().getShardManager().getUserCache() : jda.getUserCache();
             Optional<Long> id = longParser.parse(c, arguments);
             if(id.isPresent()) {
                 return id.map(userCache::getElementById);
@@ -89,7 +92,8 @@ public final class JDAParsers {
                 }
             }
             Matcher tagMatcher = TAG_PATTERN.matcher(search);
-            while(!tagMatcher.find()) {
+            while(!search.contains("#") || !tagMatcher.find()) {
+                //37 = 32 name characters + 1 (# character) + 4 discriminator characters
                 if(search.length() >= 37 || !arguments.hasNext()) {
                     return Optional.empty();
                 }

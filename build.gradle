@@ -96,7 +96,7 @@ subprojects {
             repo = 'maven'
             name = project.name
             licenses = ['Apache-2.0']
-            vcsUrl = 'https://github.com/natanbc/weeb4j.git'
+            vcsUrl = 'https://github.com/natanbc/sox.git'
             publish = true
             version {
                 name = project.version
@@ -142,7 +142,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
+    gradleVersion = '4.10.2'
 }
 
 String getProjectProperty(String propertyName) {

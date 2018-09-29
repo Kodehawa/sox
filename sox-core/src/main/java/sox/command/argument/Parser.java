@@ -213,4 +213,33 @@ public interface Parser<T> {
     default Parser<T> oneOf(@Nullable T first, @Nullable T second, @Nonnull T... others) {
         return filter(v->Objects.equals(v, first) || Objects.equals(v, second) || Helper.contains(others, v));
     }
+
+    /**
+     * Returns a parser that attempts applying the given parsers, in order, to the input.
+     * The first non {@link Optional#empty() empty} result is returned.
+     * <br>If no parsers match, or none are provided, {@link Optional#empty() Optional.empty()}
+     * is returned.
+     *
+     * @param parsers Parsers to use.
+     * @param <T> Common supertype for all provided parsers.
+     *
+     * @return A parser that attempts to apply the provided parsers.
+     */
+    @Nonnull
+    @CheckReturnValue
+    @SafeVarargs
+    static <T> Parser<T> firstOf(@Nonnull Parser<? extends T>... parsers) {
+        return (c, args) -> {
+            MarkedBlock block = args.marked();
+            for(Parser<? extends T> parser : parsers) {
+                Optional<? extends T> optional = parser.parse(c, args);
+                if(!optional.isPresent()) {
+                    block.reset();
+                    continue;
+                }
+                return optional.map(Function.identity());
+            }
+            return Optional.empty();
+        };
+    }
 }

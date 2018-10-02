@@ -7,17 +7,33 @@ import sox.util.MapFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> extends CommandManager<M, C> {
+    protected final List<SubcommandFinder<C>> finders;
+
     public ReflectiveCommandManager(@Nonnull Sox sox, @Nonnull MapFactory mapFactory, @Nonnull ListFactory listFactory) {
         super(sox, mapFactory, listFactory);
+        this.finders = listFactory.create();
+        finders.add((manager, injector, command) -> Arrays.stream(command.getClass().getDeclaredClasses())
+                .filter(commandClass()::isAssignableFrom)
+                .filter(c->!c.isAnonymousClass())
+                .filter(c->!c.isLocalClass())
+                .filter(c->(!c.isMemberClass() || Modifier.isStatic(c.getModifiers())))
+                .filter(c->!c.isSynthetic())
+                .filter(c->!Modifier.isAbstract(c.getModifiers()))
+                .map(injector::instantiate)
+                .map(manager::cast)
+        );
     }
 
     public ReflectiveCommandManager(@Nonnull Sox sox) {
-        super(sox);
+        this(sox, HashMap::new, ArrayList::new);
     }
 
     @Override
@@ -27,25 +43,22 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
         }
         Injector injector = sox().injector();
         AbstractCommand<C> command = injector.instantiate(commandClass);
-        findSubCommands(injector, commandClass(), command).forEach(c->{
+        findSubCommands(command).forEach(c->{
             command.registerSubcommand(name(c), c);
         });
         register(name(command), command);
     }
 
+    public void addSubcommandFinder(@Nonnull SubcommandFinder<C> finder) {
+        finders.add(finder);
+    }
+
     public abstract Class<? extends AbstractCommand<C>> commandClass();
 
-    private static <C extends AbstractContext<C>> List<AbstractCommand<C>> findSubCommands(Injector injector, Class<? extends AbstractCommand<C>> commandClass, AbstractCommand<C> command) {
-        return Arrays.stream(command.getClass().getDeclaredClasses())
-                .filter(commandClass::isAssignableFrom)
-                .filter(c->!c.isAnonymousClass())
-                .filter(c->!c.isLocalClass())
-                .filter(c->(!c.isMemberClass() || Modifier.isStatic(c.getModifiers())))
-                .filter(c->!c.isSynthetic())
-                .filter(c->!Modifier.isAbstract(c.getModifiers()))
-                .map(injector::instantiate)
-                .map(ReflectiveCommandManager::<C>cast)
-                .peek(c -> findSubCommands(injector, commandClass, c).forEach(c2->{
+    protected List<AbstractCommand<C>> findSubCommands(AbstractCommand<? extends C> command) {
+        return finders.stream()
+                .flatMap(f -> f.findSubCommands(this, sox().injector(), command))
+                .peek(c -> findSubCommands(c).forEach(c2->{
                     c.registerSubcommand(name(c2), c2);
                 }))
                 .collect(Collectors.toList());
@@ -61,7 +74,11 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
     }
 
     @SuppressWarnings("unchecked")
-    private static <C extends AbstractContext<C>> AbstractCommand<C> cast(Object object) {
+    private AbstractCommand<C> cast(Object object) {
         return (AbstractCommand<C>)object;
+    }
+
+    public interface SubcommandFinder<C extends AbstractContext<C>> {
+        Stream<AbstractCommand<C>> findSubCommands(ReflectiveCommandManager<?, C> manager, Injector injector, AbstractCommand<? extends C> command);
     }
 }

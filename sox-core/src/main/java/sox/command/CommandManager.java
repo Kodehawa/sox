@@ -49,7 +49,7 @@ public abstract class CommandManager<M, C extends AbstractContext<C>> {
         while(true) {
             content = parts.length == 1 ? "" : parts[1];
             parts = CommandManager.SPLITTER.rawSplit(content, 2);
-            AbstractCommand<C> subcommand = command.subcommands().get(parts[0]);
+            AbstractCommand<C> subcommand = command.subcommands().get(parts[0].toLowerCase());
             if(subcommand == null) {
                 C context = createContext(message, new Arguments(CommandManager.SPLITTER.split(content), 0));
                 AbstractCommand<C> finalCommand = command;

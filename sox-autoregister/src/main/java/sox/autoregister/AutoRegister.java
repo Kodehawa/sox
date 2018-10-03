@@ -17,6 +17,11 @@ import javax.annotation.Nonnull;
  *     finder.register(sox);
  * }
  * </code></pre>
+ * or
+ * <pre><code>
+ * Sox sox = ...
+ * AutoRegister.jda("my.package").into(sox);
+ * </code></pre>
  */
 public abstract class AutoRegister implements AutoCloseable {
     private final ScanResult result;
@@ -46,6 +51,12 @@ public abstract class AutoRegister implements AutoCloseable {
                 .forEach(sox::registerCommand);
     }
 
+    public void into(Sox sox) {
+        try(AutoRegister __ = this) {
+            register(sox);
+        }
+    }
+
     @Override
     public void close() {
         result.close();
@@ -73,6 +84,30 @@ public abstract class AutoRegister implements AutoCloseable {
     @CheckReturnValue
     private static Class<? extends AbstractCommand<?>> jdaCommandClass() {
         return findClassOrThrow("sox.command.jda.Command");
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public static AutoRegister catnip(@Nonnull String... packages) {
+        return new ForClass(catnipCommandClass(), packages);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public static AutoRegister catnip(@Nonnull ClassGraph classGraph) {
+        return new ForClass(catnipCommandClass(), classGraph);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public static AutoRegister catnip(@Nonnull ScanResult result) {
+        return new ForClass(catnipCommandClass(), result);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    private static Class<? extends AbstractCommand<?>> catnipCommandClass() {
+        return findClassOrThrow("sox.command.catnip.Command");
     }
 
     @Nonnull

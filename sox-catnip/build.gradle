@@ -1,0 +1,9 @@
+repositories {
+    jcenter()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile project(':sox-core')
+    compile 'com.github.mewna:catnip:d30f127'
+}

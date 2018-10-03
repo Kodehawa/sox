@@ -9,12 +9,25 @@ plugins {
 
 repositories {
     jcenter()
+    maven { url 'https://jitpack.io' }
+}
+
+sourceSets {
+    example {
+        compileClasspath += sourceSets.main.compileClasspath
+        compileClasspath += sourceSets.test.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+        runtimeClasspath += sourceSets.test.runtimeClasspath
+    }
 }
 
 dependencies {
     compile project(':sox-core')
-    compile project(':sox-jda')
-    compile project(':sox-autoregister')
+    
+    exampleCompile project(':sox-autoregister')
+    exampleCompile project(':sox-jda')
+    exampleCompile project(':sox-catnip')
+    exampleCompile project(':scala-support')
 }
 
 subprojects {
@@ -68,12 +81,13 @@ subprojects {
     }
 
     javadoc {
-        def dir = new File(System.getenv("JAVA_HOME"), "bin")
-        def file = new File(dir, "javadoc")
-        if(!file.isFile()) file = new File(dir, "javadoc.exe")
+        def javaHome = new File(System.getenv("JAVA_HOME"))
+        def bin = new File(javaHome, "bin")
+        def file = new File(bin, "javadoc")
+        if(!file.isFile()) file = new File(bin, "javadoc.exe")
         if(file.isFile()) {
             executable = file.getAbsolutePath()
-            options.addBooleanOption('html5', true)
+            options.addBooleanOption("html5", true)
         }
         options.optionFiles new File(rootProject.projectDir, "javadoc.options")
     }

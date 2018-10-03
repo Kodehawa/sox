@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public abstract class SoxImpl<M, C extends AbstractContext<C>> implements Sox {
+public abstract class SoxImpl<M, C extends AbstractContext<C>> implements Sox, Consumer<M> {
     protected final AtomicReference<CommandManager<M, C>> commandManagerReference = new AtomicReference<>();
     protected final ServiceManager serviceManager;
     protected final Injector injector;

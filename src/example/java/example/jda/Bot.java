@@ -3,6 +3,7 @@ package example.jda;
 import net.dv8tion.jda.core.JDABuilder;
 import sox.JDASoxBuilder;
 import sox.Sox;
+import sox.autoregister.AutoRegister;
 import sox.command.jda.PrefixProvider;
 
 import javax.security.auth.login.LoginException;
@@ -12,10 +13,8 @@ public class Bot {
         Sox sox = new JDASoxBuilder()
                 .prefix(PrefixProvider.startingWith("!"))
                 .build();
-        sox.registerCommand(Ping.class);
-        sox.registerCommand(CommandMeta.class);
-        sox.registerCommand(Nested.class);
-        sox.registerCommand(ArgParser.class);
+
+        AutoRegister.jda("example.jda").into(sox);
 
         new JDABuilder()
                 .setToken(System.getenv("BOT_TOKEN"))

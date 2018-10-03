@@ -20,13 +20,17 @@ public class JDASoxImpl extends SoxImpl<Message, Context> implements EventListen
 
     @Override
     public void onEvent(Event event) {
+        if(event instanceof MessageReceivedEvent) {
+            accept(((MessageReceivedEvent)event).getMessage());
+        }
+    }
+
+    @Override
+    public void accept(Message message) {
+        if(message.isWebhookMessage() || message.getAuthor().isBot()) return;
         withCommandManager(cm -> {
-            if(event instanceof MessageReceivedEvent) {
-                Message message = ((MessageReceivedEvent)event).getMessage();
-                if(message.isWebhookMessage() || message.getAuthor().isBot()) return;
-                Iterator<PrefixProvider> it = prefixProviders.iterator();
-                tryNextPrefix(cm, it, message);
-            }
+            Iterator<PrefixProvider> it = prefixProviders.iterator();
+            tryNextPrefix(cm, it, message);
         });
     }
 

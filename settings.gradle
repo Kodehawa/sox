@@ -1,6 +1,7 @@
 rootProject.name = 'sox'
 include 'sox-core'
 include 'sox-jda'
+include 'sox-catnip'
 include 'sox-autoregister'
 include 'scala-support'
 

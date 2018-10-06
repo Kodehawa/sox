@@ -81,7 +81,7 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context> implements Extensio
 
     @Override
     public String deploymentID() {
-        return null;
+        return deploymentID;
     }
 
     @Override

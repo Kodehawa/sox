@@ -1,7 +1,7 @@
 package sox.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.shard.DiscordEvent;
 import io.vertx.core.Future;

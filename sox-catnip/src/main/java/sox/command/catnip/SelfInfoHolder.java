@@ -1,7 +1,7 @@
 package sox.command.catnip;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.user.User;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;

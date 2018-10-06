@@ -1,8 +1,8 @@
 package sox.command.catnip.argument;
 
 import com.mewna.catnip.cache.EntityCache;
-import com.mewna.catnip.entity.Member;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.user.User;
 import sox.command.argument.Parser;
 import sox.command.argument.Parsers;
 import sox.command.catnip.Context;

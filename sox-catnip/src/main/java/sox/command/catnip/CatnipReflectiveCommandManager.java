@@ -1,6 +1,6 @@
 package sox.command.catnip;
 
-import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.message.Message;
 import sox.Sox;
 import sox.command.AbstractCommand;
 import sox.command.ReflectiveCommandManager;

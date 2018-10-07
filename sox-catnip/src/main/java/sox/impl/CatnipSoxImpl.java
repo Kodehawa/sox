@@ -86,9 +86,7 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context> implements Extensio
 
     @Override
     public void start(Future<Void> startFuture) {
-        this.consumer = catnip.eventBus().consumer(DiscordEvent.MESSAGE_CREATE, event -> {
-            accept(event.body());
-        });
+        this.consumer = catnip.on(DiscordEvent.MESSAGE_CREATE, this);
         startFuture.complete();
     }
 

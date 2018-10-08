@@ -3,6 +3,7 @@ package sox.impl;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.extension.Extension;
+import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.DiscordEvent;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -12,8 +13,10 @@ import sox.command.catnip.Context;
 import sox.command.catnip.PrefixProvider;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class CatnipSoxImpl extends SoxImpl<Message, Context> implements Extension {
     protected final List<PrefixProvider> prefixProviders;
@@ -66,6 +69,21 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context> implements Extensio
     @Override
     public Extension catnip(@Nonnull Catnip catnip) {
         this.catnip = catnip;
+        return this;
+    }
+
+    @Override
+    public Extension registerHook(@Nonnull CatnipHook catnipHook) {
+        return this;
+    }
+
+    @Override
+    public Set<CatnipHook> hooks() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Extension unregisterHook(@Nonnull CatnipHook catnipHook) {
         return this;
     }
 

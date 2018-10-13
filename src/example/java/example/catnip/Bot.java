@@ -22,7 +22,7 @@ public class Bot {
         AutoRegister.catnip("example.catnip").into(sox);
 
         Catnip.catnip(System.getenv("BOT_TOKEN"))
-                .loadExtension((Extension)sox)
+                .loadExtension((Extension) sox)
                 .startShards();
 
         System.out.println("Try the following commands:");

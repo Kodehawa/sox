@@ -1,6 +1,7 @@
 package sox.command;
 
 import sox.Sox;
+import sox.command.meta.OverrideName;
 import sox.inject.Injector;
 import sox.util.ListFactory;
 import sox.util.MapFactory;
@@ -64,13 +65,18 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
                 .collect(Collectors.toList());
     }
 
-    private static <C extends AbstractContext<C>> String name(AbstractCommand<C> command) {
+    private static String name(AbstractCommand<?> command) {
         Class<?> commandClass = command.getClass();
         OverrideName name = commandClass.getAnnotation(OverrideName.class);
+        String n;
         if(name == null || name.value().trim().isEmpty()) {
-            return commandClass.getSimpleName().toLowerCase();
+            n = commandClass.getSimpleName().toLowerCase();
+        } else {
+            n = name.value().trim().toLowerCase();
         }
-        return name.value().trim().toLowerCase();
+        //add name so command aliases can be set on registration
+        command.name(n);
+        return n;
     }
 
     @SuppressWarnings("unchecked")

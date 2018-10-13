@@ -5,6 +5,11 @@ import sox.command.hook.BeforeCommand;
 import sox.command.hook.CommandErrorHandler;
 import sox.command.hook.CommandFilter;
 import sox.command.hook.CommandHook;
+import sox.command.meta.Alias;
+import sox.command.meta.Category;
+import sox.command.meta.Description;
+import sox.command.meta.Meta;
+import sox.command.meta.Usage;
 import sox.util.ListFactory;
 import sox.util.MapFactory;
 
@@ -20,12 +25,18 @@ import java.util.Map;
 
 public abstract class AbstractCommand<C extends AbstractContext<C>> {
     private final Map<String, AbstractCommand<C>> subcommands;
+    private final Map<String, String> subcommandAliases;
     private final List<CommandHook<C>> hooks;
     private final Map<String, String> meta;
+    private final List<String> aliases;
     private final String category;
+    private final String description;
+    private final String usage;
+    private String name;
 
     public AbstractCommand(MapFactory mapFactory, ListFactory listFactory) {
         this.subcommands = mapFactory.create();
+        this.subcommandAliases = mapFactory.create();
         this.hooks = listFactory.create();
         Map<String, String> meta = new HashMap<>();
         for(Meta m : getClass().getAnnotationsByType(Meta.class)) {
@@ -34,8 +45,17 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
             }
         }
         this.meta = Collections.unmodifiableMap(meta);
+        List<String> aliases = new ArrayList<>();
+        for(Alias alias : getClass().getAnnotationsByType(Alias.class)) {
+            aliases.add(alias.value());
+        }
+        this.aliases = Collections.unmodifiableList(aliases);
         Category category = getClass().getAnnotation(Category.class);
         this.category = category == null ? null : category.value();
+        Description description = getClass().getAnnotation(Description.class);
+        this.description = description == null ? null : description.value();
+        Usage usage = getClass().getAnnotation(Usage.class);
+        this.usage = usage == null ? null : usage.value();
     }
 
     public AbstractCommand() {
@@ -66,10 +86,33 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
         return meta.get(key);
     }
 
+    @CheckReturnValue
+    public boolean hasMeta(@Nonnull String key) {
+        return meta(key) != null;
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public List<String> aliases() {
+        return aliases;
+    }
+
     @Nullable
     @CheckReturnValue
     public String category() {
         return category;
+    }
+
+    @Nullable
+    @CheckReturnValue
+    public String description() {
+        return description;
+    }
+
+    @Nullable
+    @CheckReturnValue
+    public String usage() {
+        return usage;
     }
 
     public void addHook(@Nonnull CommandHook<C> hook) {
@@ -97,10 +140,37 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
         for(AbstractCommand command : subcommands.values()) {
             command.onRegister(commandManager, this);
         }
+        for(String alias : aliases) {
+            if(parent == null) {
+                commandManager.registerAlias(alias, name);
+            } else {
+                parent.registerSubcommandAlias(alias, name);
+            }
+        }
     }
 
-    public void registerSubcommand(String name, AbstractCommand<C> subcommand) {
+    public void registerSubcommand(@Nonnull String name, @Nonnull AbstractCommand<C> subcommand) {
         subcommands.put(name, subcommand);
+    }
+
+    public void registerSubcommandAlias(@Nonnull String alias, @Nonnull String target) {
+        subcommandAliases.put(alias, target);
+    }
+
+    @Nullable
+    @CheckReturnValue
+    public AbstractCommand<C> subcommand(@Nonnull String name) {
+        AbstractCommand<C> subcommand = subcommands.get(name);
+        if(subcommand == null) {
+            String alias = subcommandAliases.get(name);
+            if(alias == null) return null;
+            return subcommands.get(alias);
+        }
+        return subcommand;
+    }
+
+    final void name(String name) {
+        this.name = name;
     }
 
     public abstract void process(C context);

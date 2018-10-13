@@ -1,8 +1,8 @@
 package example.jda;
 
-import sox.command.Meta;
 import sox.command.jda.Command;
 import sox.command.jda.Context;
+import sox.command.meta.Meta;
 
 @Meta(name = "owner")
 public class OwnerOnly extends Command {

@@ -12,6 +12,12 @@ public class Bot {
     public static void main(String[] args) throws LoginException {
         Sox sox = new JDASoxBuilder()
                 .prefix(PrefixProvider.startingWith("!"))
+                .commandFilter((context, command) -> {
+                    if(command.meta("owner") != null) {
+                        return context.author().getId().equals("your id");
+                    }
+                    return true;
+                })
                 .build();
 
         AutoRegister.jda("example.jda").into(sox);

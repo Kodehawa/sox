@@ -66,11 +66,11 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
 
     private static <C extends AbstractContext<C>> String name(AbstractCommand<C> command) {
         Class<?> commandClass = command.getClass();
-        AbstractCommand.Meta meta = commandClass.getAnnotation(AbstractCommand.Meta.class);
-        if(meta == null || meta.name().trim().isEmpty()) {
+        OverrideName name = commandClass.getAnnotation(OverrideName.class);
+        if(name == null || name.value().trim().isEmpty()) {
             return commandClass.getSimpleName().toLowerCase();
         }
-        return meta.name().trim().toLowerCase();
+        return name.value().trim().toLowerCase();
     }
 
     @SuppressWarnings("unchecked")

@@ -11,6 +11,12 @@ public class Bot {
     public static void main(String[] args) {
         Sox sox = new CatnipSoxBuilder()
                 .prefix(PrefixProvider.startingWith("!"))
+                .commandFilter((context, command) -> {
+                    if(command.meta("owner") != null) {
+                        return context.message().author().id().equals("your id");
+                    }
+                    return true;
+                })
                 .build();
 
         AutoRegister.catnip("example.catnip").into(sox);

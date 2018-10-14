@@ -30,49 +30,42 @@ public abstract class SoxBuilder<M, C extends AbstractContext<C>, T extends SoxB
     }
 
     @Nonnull
-    @CheckReturnValue
     public T commandManager(@Nonnull CommandManagerFactory<M, C> commandManagerFactory) {
         this.commandManagerFactory = commandManagerFactory;
         return asActualType();
     }
 
     @Nonnull
-    @CheckReturnValue
     public T commandFilter(CommandFilter<C> filter) {
         hooks.add(CommandHook.fromFilter(filter));
         return asActualType();
     }
 
     @Nonnull
-    @CheckReturnValue
     public T beforeCommands(BeforeCommand<C> before) {
         hooks.add(CommandHook.fromBefore(before));
         return asActualType();
     }
 
     @Nonnull
-    @CheckReturnValue
     public T afterCommands(AfterCommand<C> after) {
         hooks.add(CommandHook.fromAfter(after));
         return asActualType();
     }
 
     @Nonnull
-    @CheckReturnValue
     public T commandErrorHandler(CommandErrorHandler<C> errorHandler) {
         hooks.add(CommandHook.fromErrorHandler(errorHandler));
         return asActualType();
     }
 
     @Nonnull
-    @CheckReturnValue
     public T disableDefaultErrorHandler() {
         defaultErrorHandler = false;
         return asActualType();
     }
 
     @Nonnull
-    @CheckReturnValue
     public T enableDefaultErrorHandler() {
         defaultErrorHandler = true;
         return asActualType();

@@ -1,8 +1,8 @@
 package sox;
 
 import com.mewna.catnip.entity.message.Message;
-import sox.command.catnip.Context;
 import sox.command.catnip.CatnipReflectiveCommandManager;
+import sox.command.catnip.Context;
 import sox.command.catnip.PrefixProvider;
 import sox.impl.CatnipSoxImpl;
 
@@ -20,6 +20,7 @@ public class CatnipSoxBuilder extends SoxBuilder<Message, Context, CatnipSoxBuil
 
     public CatnipSoxBuilder() {
         super(CatnipReflectiveCommandManager::new);
+        commandFilter((context, command) -> !command.guildOnly() || !context.isDM());
     }
 
     @Nonnull

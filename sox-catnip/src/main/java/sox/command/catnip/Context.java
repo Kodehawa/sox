@@ -1,5 +1,9 @@
 package sox.command.catnip;
 
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.builder.EmbedBuilder;
+import com.mewna.catnip.entity.builder.MessageBuilder;
+import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import sox.Sox;
 import sox.command.AbstractContext;
@@ -21,8 +25,38 @@ public class Context extends AbstractContext<Context> {
     }
 
     @Nonnull
-    public CompletionStage<Message> send(String content) {
+    public CompletionStage<Message> send(@Nonnull String content) {
         return message.catnip().rest().channel().sendMessage(message.channelId(), content);
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull EmbedBuilder embed) {
+        return send(embed.build());
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull Embed embed) {
+        return message.catnip().rest().channel().sendMessage(message.channelId(), embed);
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull String content, @Nonnull EmbedBuilder embed) {
+        return send(content, embed.build());
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull String content, @Nonnull Embed embed) {
+        return send(new MessageBuilder().embed(embed).content(content));
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull MessageBuilder message) {
+        return send(message.build());
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull Message message) {
+        return this.message.catnip().rest().channel().sendMessage(this.message.channelId(), message);
     }
 
     @Override
@@ -45,5 +79,11 @@ public class Context extends AbstractContext<Context> {
     @CheckReturnValue
     public Message message() {
         return message;
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public Catnip catnip() {
+        return message.catnip();
     }
 }

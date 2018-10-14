@@ -1,9 +1,9 @@
 package sox;
 
 import net.dv8tion.jda.core.entities.Message;
+import sox.command.jda.Context;
 import sox.command.jda.JDAReflectiveCommandManager;
 import sox.command.jda.PrefixProvider;
-import sox.command.jda.Context;
 import sox.impl.JDASoxImpl;
 
 import javax.annotation.CheckReturnValue;
@@ -19,6 +19,7 @@ public class JDASoxBuilder extends SoxBuilder<Message, Context, JDASoxBuilder> {
 
     public JDASoxBuilder() {
         super(JDAReflectiveCommandManager::new);
+        commandFilter((context, command) -> !command.guildOnly() || !context.isDM());
     }
 
     @Nonnull

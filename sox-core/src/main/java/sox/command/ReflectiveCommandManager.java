@@ -1,7 +1,6 @@
 package sox.command;
 
 import sox.Sox;
-import sox.command.meta.OverrideName;
 import sox.inject.Injector;
 import sox.util.ListFactory;
 import sox.util.MapFactory;
@@ -45,9 +44,9 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
         Injector injector = sox().injector();
         AbstractCommand<C> command = injector.instantiate(commandClass);
         findSubCommands(command).forEach(c->{
-            command.registerSubcommand(name(c), c);
+            command.registerSubcommand(c.name(), c);
         });
-        register(name(command), command);
+        register(command.name(), command);
     }
 
     public void addSubcommandFinder(@Nonnull SubcommandFinder<C> finder) {
@@ -60,23 +59,9 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
         return finders.stream()
                 .flatMap(f -> f.findSubCommands(this, sox().injector(), command))
                 .peek(c -> findSubCommands(c).forEach(c2->{
-                    c.registerSubcommand(name(c2), c2);
+                    c.registerSubcommand(c2.name(), c2);
                 }))
                 .collect(Collectors.toList());
-    }
-
-    private static String name(AbstractCommand<?> command) {
-        Class<?> commandClass = command.getClass();
-        OverrideName name = commandClass.getAnnotation(OverrideName.class);
-        String n;
-        if(name == null || name.value().trim().isEmpty()) {
-            n = commandClass.getSimpleName().toLowerCase();
-        } else {
-            n = name.value().trim().toLowerCase();
-        }
-        //add name so command aliases can be set on registration
-        command.name(n);
-        return n;
     }
 
     @SuppressWarnings("unchecked")

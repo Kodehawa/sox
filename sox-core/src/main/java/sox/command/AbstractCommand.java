@@ -8,7 +8,9 @@ import sox.command.hook.CommandHook;
 import sox.command.meta.Alias;
 import sox.command.meta.Category;
 import sox.command.meta.Description;
+import sox.command.meta.GuildOnly;
 import sox.command.meta.Meta;
+import sox.command.meta.OverrideName;
 import sox.command.meta.Usage;
 import sox.util.ListFactory;
 import sox.util.MapFactory;
@@ -29,10 +31,11 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
     private final List<CommandHook<C>> hooks;
     private final Map<String, String> meta;
     private final List<String> aliases;
+    private final String name;
     private final String category;
     private final String description;
     private final String usage;
-    private String name;
+    private final boolean guildOnly;
 
     public AbstractCommand(MapFactory mapFactory, ListFactory listFactory) {
         this.subcommands = mapFactory.create();
@@ -50,12 +53,19 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
             aliases.add(alias.value());
         }
         this.aliases = Collections.unmodifiableList(aliases);
+        OverrideName name = getClass().getAnnotation(OverrideName.class);
+        if(name == null || name.value().trim().isEmpty()) {
+            this.name = getClass().getSimpleName().toLowerCase();
+        } else {
+            this.name = name.value().trim().toLowerCase();
+        }
         Category category = getClass().getAnnotation(Category.class);
         this.category = category == null ? null : category.value();
         Description description = getClass().getAnnotation(Description.class);
         this.description = description == null ? null : description.value();
         Usage usage = getClass().getAnnotation(Usage.class);
         this.usage = usage == null ? null : usage.value();
+        this.guildOnly = getClass().getAnnotation(GuildOnly.class) != null;
     }
 
     public AbstractCommand() {
@@ -97,6 +107,12 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
         return aliases;
     }
 
+    @Nonnull
+    @CheckReturnValue
+    public String name() {
+        return name;
+    }
+
     @Nullable
     @CheckReturnValue
     public String category() {
@@ -113,6 +129,11 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
     @CheckReturnValue
     public String usage() {
         return usage;
+    }
+
+    @CheckReturnValue
+    public boolean guildOnly() {
+        return guildOnly;
     }
 
     public void addHook(@Nonnull CommandHook<C> hook) {
@@ -167,10 +188,6 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
             return subcommands.get(alias);
         }
         return subcommand;
-    }
-
-    final void name(String name) {
-        this.name = name;
     }
 
     public abstract void process(C context);

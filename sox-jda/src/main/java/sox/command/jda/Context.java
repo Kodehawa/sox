@@ -1,10 +1,14 @@
 package sox.command.jda;
 
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import sox.Sox;
@@ -13,6 +17,7 @@ import sox.command.argument.Arguments;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -27,8 +32,38 @@ public class Context extends AbstractContext<Context> {
     }
 
     @Nonnull
-    public CompletionStage<Message> send(String content) {
+    public CompletionStage<Message> send(@Nonnull String content) {
         return channel().sendMessage(content).submit();
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull EmbedBuilder embed) {
+        return send(embed.build());
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull MessageEmbed embed) {
+        return channel().sendMessage(embed).submit();
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull String content, @Nonnull EmbedBuilder embed) {
+        return send(content, embed.build());
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull String content, @Nonnull MessageEmbed embed) {
+        return send(new MessageBuilder().setContent(content).setEmbed(embed));
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull MessageBuilder message) {
+        return send(message.build());
+    }
+
+    @Nonnull
+    public CompletionStage<Message> send(@Nonnull Message message) {
+        return channel().sendMessage(message).submit();
     }
 
     @Override
@@ -56,30 +91,36 @@ public class Context extends AbstractContext<Context> {
     @Nonnull
     @CheckReturnValue
     public MessageChannel channel() {
-        return message().getChannel();
+        return message.getChannel();
     }
 
     @Nonnull
     @CheckReturnValue
     public User author() {
-        return message().getAuthor();
+        return message.getAuthor();
     }
 
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     public Member member() {
-        return message().getMember();
+        return message.getMember();
     }
 
     @Nonnull
     @CheckReturnValue
     public Guild guild() {
-        return message().getGuild();
+        return message.getGuild();
     }
 
     @Nonnull
     @CheckReturnValue
     public TextChannel textChannel() {
-        return message().getTextChannel();
+        return message.getTextChannel();
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public JDA jda() {
+        return message.getJDA();
     }
 }

@@ -2,7 +2,6 @@ package sox.command.catnip;
 
 import com.mewna.catnip.entity.message.Message;
 import sox.Sox;
-import sox.command.AbstractCommand;
 import sox.command.ReflectiveCommandManager;
 import sox.command.argument.Arguments;
 import sox.util.ListFactory;
@@ -13,7 +12,7 @@ import javax.annotation.Nonnull;
 /**
  * Default command manager for JDA bots.
  */
-public class CatnipReflectiveCommandManager extends ReflectiveCommandManager<Message, Context> {
+public class CatnipReflectiveCommandManager extends ReflectiveCommandManager<Message, Context, Command> {
     public CatnipReflectiveCommandManager(@Nonnull Sox sox, @Nonnull MapFactory mapFactory, @Nonnull ListFactory listFactory) {
         super(sox, mapFactory, listFactory);
     }
@@ -23,7 +22,7 @@ public class CatnipReflectiveCommandManager extends ReflectiveCommandManager<Mes
     }
 
     @Override
-    public Class<? extends AbstractCommand<Context>> commandClass() {
+    public Class<? extends Command> commandClass() {
         return Command.class;
     }
 

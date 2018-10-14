@@ -25,10 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractCommand<C extends AbstractContext<C>> {
-    private final Map<String, AbstractCommand<C>> subcommands;
+public abstract class AbstractCommand<C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
+    private final Map<String, T> subcommands;
     private final Map<String, String> subcommandAliases;
-    private final List<CommandHook<C>> hooks;
+    private final List<CommandHook<C, T>> hooks;
     private final Map<String, String> meta;
     private final List<String> aliases;
     private final String name;
@@ -36,6 +36,7 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
     private final String description;
     private final String usage;
     private final boolean guildOnly;
+    private volatile ParentReference<C, T> parent;
 
     public AbstractCommand(MapFactory mapFactory, ListFactory listFactory) {
         this.subcommands = mapFactory.create();
@@ -74,13 +75,13 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
 
     @Nonnull
     @CheckReturnValue
-    public Map<String, AbstractCommand<C>> subcommands() {
+    public Map<String, T> subcommands() {
         return subcommands;
     }
 
     @Nonnull
     @CheckReturnValue
-    public List<CommandHook<C>> hooks() {
+    public List<CommandHook<C, T>> hooks() {
         return hooks;
     }
 
@@ -136,29 +137,40 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
         return guildOnly;
     }
 
-    public void addHook(@Nonnull CommandHook<C> hook) {
+    @CheckReturnValue
+    @Nullable
+    public AbstractCommand<C, T> parent() {
+        if(parent == null) {
+            throw new IllegalStateException("Parent has not been set yet! This method can only be used after the command" +
+                    " has been registered");
+        }
+        return parent.value;
+    }
+
+    public void addHook(@Nonnull CommandHook<C, T> hook) {
         hooks.add(hook);
     }
 
-    public void addFilter(@Nonnull CommandFilter<C> filter) {
+    public void addFilter(@Nonnull CommandFilter<C, T> filter) {
         addHook(CommandHook.fromFilter(filter));
     }
 
-    public void addBefore(@Nonnull BeforeCommand<C> before) {
+    public void addBefore(@Nonnull BeforeCommand<C, T> before) {
         addHook(CommandHook.fromBefore(before));
     }
 
-    public void addAfter(@Nonnull AfterCommand<C> after) {
+    public void addAfter(@Nonnull AfterCommand<C, T> after) {
         addHook(CommandHook.fromAfter(after));
     }
 
-    public void addErrorHandler(@Nonnull CommandErrorHandler<C> errorHandler) {
+    public void addErrorHandler(@Nonnull CommandErrorHandler<C, T> errorHandler) {
         addHook(CommandHook.fromErrorHandler(errorHandler));
     }
 
     @OverridingMethodsMustInvokeSuper
-    public void onRegister(@Nonnull CommandManager commandManager, @Nullable AbstractCommand parent) {
-        for(AbstractCommand command : subcommands.values()) {
+    public void onRegister(@Nonnull CommandManager<?, C, T> commandManager, @Nullable AbstractCommand<C, T> parent) {
+        this.parent = new ParentReference<>(parent);
+        for(AbstractCommand<C, T> command : subcommands.values()) {
             command.onRegister(commandManager, this);
         }
         for(String alias : aliases) {
@@ -170,7 +182,7 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
         }
     }
 
-    public void registerSubcommand(@Nonnull String name, @Nonnull AbstractCommand<C> subcommand) {
+    public void registerSubcommand(@Nonnull String name, @Nonnull T subcommand) {
         subcommands.put(name, subcommand);
     }
 
@@ -180,8 +192,8 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
 
     @Nullable
     @CheckReturnValue
-    public AbstractCommand<C> subcommand(@Nonnull String name) {
-        AbstractCommand<C> subcommand = subcommands.get(name);
+    public T subcommand(@Nonnull String name) {
+        T subcommand = subcommands.get(name);
         if(subcommand == null) {
             String alias = subcommandAliases.get(name);
             if(alias == null) return null;
@@ -191,4 +203,17 @@ public abstract class AbstractCommand<C extends AbstractContext<C>> {
     }
 
     public abstract void process(C context);
+
+    @SuppressWarnings("unchecked")
+    private static <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> T cast(AbstractCommand<C, ?> command) {
+        return (T)command;
+    }
+
+    private static class ParentReference<C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
+        final AbstractCommand<C, T> value;
+
+        private ParentReference(AbstractCommand<C, T> value) {
+            this.value = value;
+        }
+    }
 }

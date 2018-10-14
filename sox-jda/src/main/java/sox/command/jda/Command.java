@@ -7,7 +7,7 @@ import sox.util.MapFactory;
 /**
  * Command class used for JDA bots.
  */
-public abstract class Command extends AbstractCommand<Context> {
+public abstract class Command extends AbstractCommand<Context, Command> {
     public Command(MapFactory mapFactory, ListFactory listFactory) {
         super(mapFactory, listFactory);
     }

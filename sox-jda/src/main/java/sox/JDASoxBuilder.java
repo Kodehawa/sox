@@ -1,6 +1,7 @@
 package sox;
 
 import net.dv8tion.jda.core.entities.Message;
+import sox.command.jda.Command;
 import sox.command.jda.Context;
 import sox.command.jda.JDAReflectiveCommandManager;
 import sox.command.jda.PrefixProvider;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class JDASoxBuilder extends SoxBuilder<Message, Context, JDASoxBuilder> {
+public class JDASoxBuilder extends SoxBuilder<Message, Context, Command, JDASoxBuilder> {
     private static final List<PrefixProvider> DEFAULT_PREFIX = Collections.singletonList(PrefixProvider.mention());
 
     private List<PrefixProvider> prefixProviders = DEFAULT_PREFIX;

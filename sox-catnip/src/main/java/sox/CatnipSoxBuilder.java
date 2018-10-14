@@ -2,6 +2,7 @@ package sox;
 
 import com.mewna.catnip.entity.message.Message;
 import sox.command.catnip.CatnipReflectiveCommandManager;
+import sox.command.catnip.Command;
 import sox.command.catnip.Context;
 import sox.command.catnip.PrefixProvider;
 import sox.impl.CatnipSoxImpl;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class CatnipSoxBuilder extends SoxBuilder<Message, Context, CatnipSoxBuilder> {
+public class CatnipSoxBuilder extends SoxBuilder<Message, Context, Command, CatnipSoxBuilder> {
     private static final List<PrefixProvider> DEFAULT_PREFIX = Collections.singletonList(PrefixProvider.mention());
 
     private List<PrefixProvider> prefixProviders = DEFAULT_PREFIX;

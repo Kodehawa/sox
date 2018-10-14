@@ -5,14 +5,14 @@ import sox.inject.Injector
 
 import scala.reflect.runtime.universe
 
-private[scala] class Finder[C <: AbstractContext[C]] extends ReflectiveCommandManager.SubcommandFinder[C] {
-    private type JavaStream[T] = java.util.stream.Stream[T]
+private[scala] class Finder[C <: AbstractContext[C], T <: AbstractCommand[C, T]] extends ReflectiveCommandManager.SubcommandFinder[C, T] {
+    private type JavaStream[U] = java.util.stream.Stream[U]
 
-    override def findSubCommands(manager: ReflectiveCommandManager[_, C],
-                                 injector: Injector, command: AbstractCommand[_ <: C]): JavaStream[AbstractCommand[C]] = {
+    override def findSubCommands(manager: ReflectiveCommandManager[_, C, T],
+                                 injector: Injector, command: T): JavaStream[T] = {
         //cheat compiler, otherwise we'd get something like "type arguments
         //do not conform to class type parameter bounds"
-        val c: AbstractCommand[C] = command.asInstanceOf[AbstractCommand[C]]
+        val c: AbstractCommand[C, T] = command.asInstanceOf[AbstractCommand[C, T]]
 
         val runtimeMirror = universe.runtimeMirror(c.getClass.getClassLoader)
         val instanceMirror = runtimeMirror.reflect(c)
@@ -29,7 +29,7 @@ private[scala] class Finder[C <: AbstractContext[C]] extends ReflectiveCommandMa
                     case Some(constructor) => instanceMirror.reflectClass(c).reflectConstructor(constructor)()
                 }
             })
-            .map(_.asInstanceOf[AbstractCommand[C]])
+            .map(_.asInstanceOf[T])
             .asJavaCollection
             .stream()
     }

@@ -1,6 +1,7 @@
 package sox.impl;
 
 import sox.Sox;
+import sox.command.AbstractCommand;
 import sox.command.AbstractContext;
 import sox.command.CommandManager;
 import sox.inject.Injector;
@@ -10,8 +11,8 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public abstract class SoxImpl<M, C extends AbstractContext<C>> implements Sox, Consumer<M> {
-    protected final AtomicReference<CommandManager<M, C>> commandManagerReference = new AtomicReference<>();
+public abstract class SoxImpl<M, C extends AbstractContext<C>, T extends AbstractCommand<C, T>> implements Sox, Consumer<M> {
+    protected final AtomicReference<CommandManager<M, C, T>> commandManagerReference = new AtomicReference<>();
     protected final ServiceManager serviceManager;
     protected final Injector injector;
 
@@ -23,15 +24,15 @@ public abstract class SoxImpl<M, C extends AbstractContext<C>> implements Sox, C
         serviceManager.registerService(this);
     }
 
-    public void registerCommandManager(CommandManager<M, C> commandManager) {
+    public void registerCommandManager(CommandManager<M, C, T> commandManager) {
         if(!commandManagerReference.compareAndSet(null, commandManager)) {
             throw new IllegalStateException("AbstractCommand manager already set!");
         }
         serviceManager.registerService(commandManager);
     }
 
-    public void withCommandManager(Consumer<CommandManager<M, C>> action) {
-        CommandManager<M, C> manager = commandManagerReference.get();
+    public void withCommandManager(Consumer<CommandManager<M, C, T>> action) {
+        CommandManager<M, C, T> manager = commandManagerReference.get();
         if(manager != null) {
             action.accept(manager);
         }

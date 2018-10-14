@@ -9,16 +9,17 @@ import javax.annotation.Nonnull;
  * Called after a command executes <b>successfully</b>.
  *
  * @param <C> Type of the context implementation.
+ * @param <T> Type of the command implementation.
  *
  * @see CommandHook
  */
 @FunctionalInterface
-public interface AfterCommand<C extends AbstractContext<C>> {
+public interface AfterCommand<C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
     /**
      * Called after a command executes <b>successfully</b>.
      *
      * @param context Context for the command call.
      * @param command Command called.
      */
-    void afterCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
+    void afterCommand(@Nonnull C context, @Nonnull T command);
 }

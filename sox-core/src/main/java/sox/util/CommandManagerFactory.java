@@ -1,6 +1,7 @@
 package sox.util;
 
 import sox.Sox;
+import sox.command.AbstractCommand;
 import sox.command.AbstractContext;
 import sox.command.CommandManager;
 
@@ -14,7 +15,7 @@ import javax.annotation.Nonnull;
  * @param <C> Type of the {@link AbstractContext context} implementation.
  */
 @FunctionalInterface
-public interface CommandManagerFactory<M, C extends AbstractContext<C>> {
+public interface CommandManagerFactory<M, C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
     /**
      * Creates a new command manager.
      *
@@ -24,5 +25,5 @@ public interface CommandManagerFactory<M, C extends AbstractContext<C>> {
      */
     @Nonnull
     @CheckReturnValue
-    CommandManager<M, C> create(@Nonnull Sox sox);
+    CommandManager<M, C, T> create(@Nonnull Sox sox);
 }

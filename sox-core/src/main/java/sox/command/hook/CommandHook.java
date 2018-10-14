@@ -10,19 +10,20 @@ import javax.annotation.Nonnull;
  * Hook for command calls. Can do pre-command and post-command tasks, abort command execution and handle errors.
  *
  * @param <C> Type of the context implementation.
+ * @param <T> Type of the command implementation.
  *
  * @apiNote {@link #shouldRunCommand(AbstractContext, AbstractCommand) shouldRunCommand} executes
  *          global hooks <b>before</b> any command specific hooks. All other callbacks execute
  *          command specific first.
  */
-public interface CommandHook<C extends AbstractContext<C>> {
+public interface CommandHook<C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
     /**
      * Called after a command executes <b>successfully</b>.
      *
      * @param context Context for the command call.
      * @param command Command called.
      */
-    void afterCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
+    void afterCommand(@Nonnull C context, @Nonnull T command);
 
     /**
      * Called before a command executes, if all filters allowed it to execute.
@@ -30,7 +31,7 @@ public interface CommandHook<C extends AbstractContext<C>> {
      * @param context Context for the command call.
      * @param command Command being called.
      */
-    void beforeCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
+    void beforeCommand(@Nonnull C context, @Nonnull T command);
 
     /**
      * Filters whether or not the command call should be allowed. If any hook returns false, the command
@@ -42,7 +43,7 @@ public interface CommandHook<C extends AbstractContext<C>> {
      * @return False if the command execution should be aborted.
      */
     @CheckReturnValue
-    boolean shouldRunCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command);
+    boolean shouldRunCommand(@Nonnull C context, @Nonnull T command);
 
     /**
      * Called when a command throws an exception.
@@ -54,22 +55,23 @@ public interface CommandHook<C extends AbstractContext<C>> {
      * @return True, if the exception was handled. Returning true means <b>no other exception hooks will be called</b>.
      */
     @CheckReturnValue
-    boolean onCommandError(@Nonnull C context, @Nonnull AbstractCommand<C> command, @Nonnull Exception e);
+    boolean onCommandError(@Nonnull C context, @Nonnull T command, @Nonnull Exception e);
 
     /**
      * Creates a hook from an {@link AfterCommand after command} action.
      *
      * @param after Action to run after command execution.
      * @param <C> Type of the context implementation.
+     * @param <T> Type of the command implementation.
      *
      * @return A hook that delegates to the provided callback.
      */
     @Nonnull
     @CheckReturnValue
-    static <C extends AbstractContext<C>> CommandHook<C> fromAfter(@Nonnull AfterCommand<C> after) {
-        return new AbstractCommandHook<C>() {
+    static <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> CommandHook<C, T> fromAfter(@Nonnull AfterCommand<C, T> after) {
+        return new AbstractCommandHook<C, T>() {
             @Override
-            public void afterCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command) {
+            public void afterCommand(@Nonnull C context, @Nonnull T command) {
                 after.afterCommand(context, command);
             }
         };
@@ -80,15 +82,16 @@ public interface CommandHook<C extends AbstractContext<C>> {
      *
      * @param before Action to run before command execution.
      * @param <C> Type of the context implementation.
+     * @param <T> Type of the command implementation.
      *
      * @return A hook that delegates to the provided callback.
      */
     @Nonnull
     @CheckReturnValue
-    static <C extends AbstractContext<C>> CommandHook<C> fromBefore(@Nonnull BeforeCommand<C> before) {
-        return new AbstractCommandHook<C>() {
+    static <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> CommandHook<C, T> fromBefore(@Nonnull BeforeCommand<C, T> before) {
+        return new AbstractCommandHook<C, T>() {
             @Override
-            public void beforeCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command) {
+            public void beforeCommand(@Nonnull C context, @Nonnull T command) {
                 before.beforeCommand(context, command);
             }
         };
@@ -99,15 +102,16 @@ public interface CommandHook<C extends AbstractContext<C>> {
      *
      * @param filter Filter for command calls.
      * @param <C> Type of the context implementation.
+     * @param <T> Type of the command implementation.
      *
      * @return A hook that delegates to the provided callback.
      */
     @Nonnull
     @CheckReturnValue
-    static <C extends AbstractContext<C>> CommandHook<C> fromFilter(@Nonnull CommandFilter<C> filter) {
-        return new AbstractCommandHook<C>() {
+    static <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> CommandHook<C, T> fromFilter(@Nonnull CommandFilter<C, T> filter) {
+        return new AbstractCommandHook<C, T>() {
             @Override
-            public boolean shouldRunCommand(@Nonnull C context, @Nonnull AbstractCommand<C> command) {
+            public boolean shouldRunCommand(@Nonnull C context, @Nonnull T command) {
                 return filter.shouldRunCommand(context, command);
             }
         };
@@ -118,15 +122,16 @@ public interface CommandHook<C extends AbstractContext<C>> {
      *
      * @param errorHandler Handler for any exceptions thrown by commands.
      * @param <C> Type of the context implementation.
+     * @param <T> Type of the command implementation.
      *
      * @return A hook that delegates to the provided callback.
      */
     @Nonnull
     @CheckReturnValue
-    static <C extends AbstractContext<C>> CommandHook<C> fromErrorHandler(@Nonnull CommandErrorHandler<C> errorHandler) {
-        return new AbstractCommandHook<C>() {
+    static <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> CommandHook<C, T> fromErrorHandler(@Nonnull CommandErrorHandler<C, T> errorHandler) {
+        return new AbstractCommandHook<C, T>() {
             @Override
-            public boolean onCommandError(@Nonnull C context, @Nonnull AbstractCommand<C> command, @Nonnull Exception e) {
+            public boolean onCommandError(@Nonnull C context, @Nonnull T command, @Nonnull Exception e) {
                 return errorHandler.onCommandError(context, command, e);
             }
         };

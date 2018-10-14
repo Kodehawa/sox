@@ -25,7 +25,7 @@ public interface Sox {
      */
     @Nonnull
     @CheckReturnValue
-    CommandManager<?, ?> commandManager();
+    CommandManager<?, ?, ?> commandManager();
 
     /**
      * Returns the {@link Injector injector} instance used for dependency injection.
@@ -42,7 +42,7 @@ public interface Sox {
      * @param commandClass Command class to register.
      */
     @SuppressWarnings("unchecked")
-    default void registerCommand(@Nonnull Class<? extends AbstractCommand<?>> commandClass) {
+    default void registerCommand(@Nonnull Class<? extends AbstractCommand<?, ?>> commandClass) {
         ((CommandManager)commandManager()).register(commandClass);
     }
 

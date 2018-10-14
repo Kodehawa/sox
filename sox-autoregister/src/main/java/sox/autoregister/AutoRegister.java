@@ -40,14 +40,14 @@ public abstract class AutoRegister implements AutoCloseable {
 
     @Nonnull
     @CheckReturnValue
-    public abstract Class<? extends AbstractCommand<?>> commandClass();
+    public abstract Class<? extends AbstractCommand<?, ?>> commandClass();
 
     public void register(Sox sox) {
         result.getSubclasses(commandClass().getName()).filter(c -> c.getOuterClasses().isEmpty())
                 .filter(c -> !(c.isAbstract() || c.isSynthetic()))
                 .loadClasses()
                 .stream()
-                .<Class<? extends AbstractCommand<?>>>map(c -> c.asSubclass(commandClass()))
+                .<Class<? extends AbstractCommand<?, ?>>>map(c -> c.asSubclass(commandClass()))
                 .forEach(sox::registerCommand);
     }
 
@@ -82,7 +82,7 @@ public abstract class AutoRegister implements AutoCloseable {
 
     @Nonnull
     @CheckReturnValue
-    private static Class<? extends AbstractCommand<?>> jdaCommandClass() {
+    private static Class<? extends AbstractCommand<?, ?>> jdaCommandClass() {
         return findClassOrThrow("sox.command.jda.Command");
     }
 
@@ -106,35 +106,35 @@ public abstract class AutoRegister implements AutoCloseable {
 
     @Nonnull
     @CheckReturnValue
-    private static Class<? extends AbstractCommand<?>> catnipCommandClass() {
+    private static Class<? extends AbstractCommand<?, ?>> catnipCommandClass() {
         return findClassOrThrow("sox.command.catnip.Command");
     }
 
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("unchecked")
-    private static Class<? extends AbstractCommand<?>> findClassOrThrow(@Nonnull String name) {
+    private static Class<? extends AbstractCommand<?, ?>> findClassOrThrow(@Nonnull String name) {
         try {
-            return (Class<? extends AbstractCommand<?>>)Class.forName(name).asSubclass(AbstractCommand.class);
+            return (Class<? extends AbstractCommand<?, ?>>)Class.forName(name).asSubclass(AbstractCommand.class);
         } catch(ClassNotFoundException e) {
             throw new IllegalStateException("Command class " + name + " not found");
         }
     }
 
     public static class ForClass extends AutoRegister {
-        private final Class<? extends AbstractCommand<?>> commandClass;
+        private final Class<? extends AbstractCommand<?, ?>> commandClass;
 
-        public ForClass(@Nonnull Class<? extends AbstractCommand<?>> commandClass, ScanResult result) {
+        public ForClass(@Nonnull Class<? extends AbstractCommand<?, ?>> commandClass, ScanResult result) {
             super(result);
             this.commandClass = commandClass;
         }
 
-        public ForClass(@Nonnull Class<? extends AbstractCommand<?>> commandClass, ClassGraph classGraph) {
+        public ForClass(@Nonnull Class<? extends AbstractCommand<?, ?>> commandClass, ClassGraph classGraph) {
             super(classGraph);
             this.commandClass = commandClass;
         }
 
-        public ForClass(@Nonnull Class<? extends AbstractCommand<?>> commandClass, String... packages) {
+        public ForClass(@Nonnull Class<? extends AbstractCommand<?, ?>> commandClass, String... packages) {
             super(packages);
             this.commandClass = commandClass;
         }
@@ -142,7 +142,7 @@ public abstract class AutoRegister implements AutoCloseable {
         @Override
         @Nonnull
         @CheckReturnValue
-        public Class<? extends AbstractCommand<?>> commandClass() {
+        public Class<? extends AbstractCommand<?, ?>> commandClass() {
             return commandClass;
         }
     }

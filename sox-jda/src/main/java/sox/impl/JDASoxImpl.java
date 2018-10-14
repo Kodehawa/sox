@@ -5,13 +5,14 @@ import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
 import sox.command.CommandManager;
+import sox.command.jda.Command;
 import sox.command.jda.Context;
 import sox.command.jda.PrefixProvider;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class JDASoxImpl extends SoxImpl<Message, Context> implements EventListener {
+public class JDASoxImpl extends SoxImpl<Message, Context, Command> implements EventListener {
     protected final List<PrefixProvider> prefixProviders;
 
     public JDASoxImpl(List<PrefixProvider> prefixProviders) {
@@ -34,7 +35,7 @@ public class JDASoxImpl extends SoxImpl<Message, Context> implements EventListen
         });
     }
 
-    private static void tryNextPrefix(CommandManager<Message, Context> manager, Iterator<PrefixProvider> providers, Message message) {
+    private static void tryNextPrefix(CommandManager<Message, Context, Command> manager, Iterator<PrefixProvider> providers, Message message) {
         if(!providers.hasNext()) return;
         providers.next().getPrefix(manager.sox(), message)
                 .handle((prefix, error) -> {

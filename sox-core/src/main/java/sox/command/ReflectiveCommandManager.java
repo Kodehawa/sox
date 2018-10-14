@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> extends CommandManager<M, C> {
-    protected final List<SubcommandFinder<C>> finders;
+public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>, T extends AbstractCommand<C, T>> extends CommandManager<M, C, T> {
+    protected final List<SubcommandFinder<C, T>> finders;
 
     public ReflectiveCommandManager(@Nonnull Sox sox, @Nonnull MapFactory mapFactory, @Nonnull ListFactory listFactory) {
         super(sox, mapFactory, listFactory);
@@ -37,25 +37,25 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
     }
 
     @Override
-    public void register(Class<? extends AbstractCommand<C>> commandClass) {
+    public void register(Class<? extends T> commandClass) {
         if(!commandClass().isAssignableFrom(commandClass)) {
             throw new IllegalArgumentException("Expected command to be a subtype of " + commandClass() + ", but got " + commandClass);
         }
         Injector injector = sox().injector();
-        AbstractCommand<C> command = injector.instantiate(commandClass);
+        T command = injector.instantiate(commandClass);
         findSubCommands(command).forEach(c->{
             command.registerSubcommand(c.name(), c);
         });
         register(command.name(), command);
     }
 
-    public void addSubcommandFinder(@Nonnull SubcommandFinder<C> finder) {
+    public void addSubcommandFinder(@Nonnull SubcommandFinder<C, T> finder) {
         finders.add(finder);
     }
 
-    public abstract Class<? extends AbstractCommand<C>> commandClass();
+    public abstract Class<? extends AbstractCommand<C, T>> commandClass();
 
-    protected List<AbstractCommand<C>> findSubCommands(AbstractCommand<? extends C> command) {
+    protected List<T> findSubCommands(T command) {
         return finders.stream()
                 .flatMap(f -> f.findSubCommands(this, sox().injector(), command))
                 .peek(c -> findSubCommands(c).forEach(c2->{
@@ -65,11 +65,11 @@ public abstract class ReflectiveCommandManager<M, C extends AbstractContext<C>> 
     }
 
     @SuppressWarnings("unchecked")
-    private AbstractCommand<C> cast(Object object) {
-        return (AbstractCommand<C>)object;
+    private T cast(Object object) {
+        return (T)object;
     }
 
-    public interface SubcommandFinder<C extends AbstractContext<C>> {
-        Stream<AbstractCommand<C>> findSubCommands(ReflectiveCommandManager<?, C> manager, Injector injector, AbstractCommand<? extends C> command);
+    public interface SubcommandFinder<C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
+        Stream<T> findSubCommands(ReflectiveCommandManager<?, C, T> manager, Injector injector, T command);
     }
 }

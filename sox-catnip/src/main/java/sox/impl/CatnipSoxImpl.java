@@ -9,6 +9,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import sox.command.CommandManager;
+import sox.command.catnip.Command;
 import sox.command.catnip.Context;
 import sox.command.catnip.PrefixProvider;
 
@@ -18,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class CatnipSoxImpl extends SoxImpl<Message, Context> implements Extension {
+public class CatnipSoxImpl extends SoxImpl<Message, Context, Command> implements Extension {
     protected final List<PrefixProvider> prefixProviders;
     protected final String deploymentID;
 
@@ -41,7 +42,7 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context> implements Extensio
         });
     }
 
-    private static void tryNextPrefix(CommandManager<Message, Context> manager, Iterator<PrefixProvider> providers, Message message) {
+    private static void tryNextPrefix(CommandManager<Message, Context, Command> manager, Iterator<PrefixProvider> providers, Message message) {
         if(!providers.hasNext()) return;
         providers.next().getPrefix(manager.sox(), message)
                 .handle((prefix, error) -> {

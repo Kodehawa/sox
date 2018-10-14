@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * @param <M> Type of the object given to command managers, usually the discord library's "Message" object.
  * @param <C> Type of the AbstractContext implementation specific to the used discord library.
+ * @param <CT> Type of the AbstractCommand implementation specific to the used discord library.
  * @param <T> Type of the SoxBuilder subclass.
  */
 public abstract class SoxBuilder<M, C extends AbstractContext<C>, CT extends AbstractCommand<C, CT>, T extends SoxBuilder<M, C, CT, T>> {

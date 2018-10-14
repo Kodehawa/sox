@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
  *
  * @param <M> Type of the "Message" object.
  * @param <C> Type of the {@link AbstractContext context} implementation.
+ * @param <T> Type of the {@link AbstractCommand command} implementation.
  */
 @FunctionalInterface
 public interface CommandManagerFactory<M, C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {

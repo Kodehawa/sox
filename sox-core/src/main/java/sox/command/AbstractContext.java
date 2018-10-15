@@ -223,7 +223,7 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
      * <br>Example:
      * Given the arguments <code>[1, 2, "abc"]</code>:
      * <pre><code>
-     * List&lt;Integer&gt; ints = context.many({@link Parsers#parseInt() Parsers.parseInt()});
+     * List&lt;Integer&gt; ints = context.many({@link Parsers#strictInt()} Parsers.strictInt()});
      * assertEquals(ints.size(), 2);
      * assertEquals(ints.get(0), 1);
      * assertEquals(ints.get(1), 2);
@@ -265,11 +265,11 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
      * <br>Example:
      * Given the arguments <code>[1, 2, -1]</code>:
      * <pre><code>
-     * List&lt;Integer&gt; ints = context.takeUntil({@link Parsers#parseInt() Parsers.parseInt()}, {@link Parsers#parseInt() Parsers.parseInt()}.{@link Parser#filter(Predicate) filter(x-&gt;x &lt; 0)});
+     * List&lt;Integer&gt; ints = context.takeUntil({@link Parsers#strictInt() Parsers.strictInt()}, {@link Parsers#strictInt() Parsers.strictInt()}.{@link Parser#filter(Predicate) filter(x-&gt;x &lt; 0)});
      * assertEquals(ints.size(), 2);
      * assertEquals(ints.get(0), 1);
      * assertEquals(ints.get(1), 2);
-     * Integer last = context.argument({@link Parsers#parseInt() Parsers.parseInt()});
+     * Integer last = context.argument({@link Parsers#strictInt() Parsers.strictInt()});
      * assertEquals(last, -1);
      * </code></pre>
      *

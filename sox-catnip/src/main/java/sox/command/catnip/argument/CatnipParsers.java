@@ -49,7 +49,7 @@ public final class CatnipParsers {
     @Nonnull
     @CheckReturnValue
     public static Parser<User> user() {
-        Parser<Long> longParser = Parsers.parseLong();
+        Parser<Long> longParser = Parsers.strictLong();
         return (abstractContext, arguments) -> {
             Context c = (Context)abstractContext;
             Optional<Long> id = longParser.parse(c, arguments);

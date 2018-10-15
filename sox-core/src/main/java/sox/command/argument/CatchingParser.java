@@ -11,7 +11,7 @@ import java.util.function.Function;
  * Similar to {@link BasicParser}, but catches any thrown exceptions and allows having custom handling
  * of them them, or defaulting to an empty result.
  *
- * @param <T> esulting type of the transformation.
+ * @param <T> Resulting type of the transformation.
  */
 public class CatchingParser<T> implements Parser<T> {
     private final ThrowingFunction<String, T> parseFunction;

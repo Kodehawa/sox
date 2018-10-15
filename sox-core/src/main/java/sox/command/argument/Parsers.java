@@ -28,14 +28,48 @@ public class Parsers {
     }
 
     /**
-     * Returns a parser that matches integers.
+     * Returns a parser that strictly matches integers.
+     * <br>This parser behaves exactly like {@link Integer#valueOf(String)}.
      *
-     * @return A parser that matches integers.
+     * @return A parser that strictly matches integers.
      */
     @Nonnull
     @CheckReturnValue
-    public static Parser<Integer> parseInt() {
+    public static Parser<Integer> strictInt() {
         return new CatchingParser<>(Integer::valueOf);
+    }
+
+    /**
+     * Returns a parser that strictly matches integers.
+     * <br>This parser behaves exactly like {@link Integer#valueOf(String)}.
+     *
+     * @return A parser that strictly matches integers.
+     *
+     * @deprecated Use {@link #strictInt()} or {@link #lenientInt()} instead.
+     */
+    @Nonnull
+    @CheckReturnValue
+    @Deprecated
+    public static Parser<Integer> parseInt() {
+        return strictInt();
+    }
+
+    /**
+     * Returns a parser that leniently matches integers.
+     * <br>This parser will ignore any {@code .} and {@code ,}
+     * characters, and will multiply numbers depending on their suffix:
+     * <ul>
+     *     <li>{@code k} will multiply the results by 1000</li>
+     *     <li>{@code kk} or {@code m} will multiply the results by 1000000</li>
+     * </ul>
+     * <br>Example: {@code 1.000k} {@literal ->} {@code 1000000}
+     *
+     * @return A parser that leniently matches integers.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static Parser<Integer> lenientInt() {
+        return new IntegerTypeParser<>((s, m) -> Integer.parseInt(s) * m);
     }
 
     /**
@@ -50,14 +84,48 @@ public class Parsers {
     }
 
     /**
-     * Returns a parser that matches longs.
+     * Returns a parser that strictly matches longs.
+     * <br>This parser behaves exactly like {@link Long#valueOf(String)}.
      *
-     * @return A parser that matches longs.
+     * @return A parser that strictly matches longs.
      */
     @Nonnull
     @CheckReturnValue
-    public static Parser<Long> parseLong() {
+    public static Parser<Long> strictLong() {
         return new CatchingParser<>(Long::valueOf);
+    }
+
+    /**
+     * Returns a parser that matches longs.
+     * <br>This parser behaves exactly like {@link Long#valueOf(String)}.
+     *
+     * @return A parser that matches longs.
+     *
+     * @deprecated Use {@link #strictLong()} or {@link #lenientLong()} instead.
+     */
+    @Nonnull
+    @CheckReturnValue
+    @Deprecated
+    public static Parser<Long> parseLong() {
+        return strictLong();
+    }
+
+    /**
+     * Returns a parser that leniently matches longs.
+     * <br>This parser will ignore any {@code .} and {@code ,}
+     * characters, and will multiply numbers depending on their suffix:
+     * <ul>
+     *     <li>{@code k} will multiply the results by 1000</li>
+     *     <li>{@code kk} or {@code m} will multiply the results by 1000000</li>
+     * </ul>
+     * <br>Example: {@code 1.000k} {@literal ->} {@code 1000000}
+     *
+     * @return A parser that leniently matches longs.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static Parser<Long> lenientLong() {
+        return new IntegerTypeParser<>((s, m) -> Long.parseLong(s) * m);
     }
 
     /**
@@ -84,7 +152,23 @@ public class Parsers {
     public static Parser<Integer> range(int from, int to) {
         int smaller = Math.min(from, to);
         int larger = Math.max(from, to);
-        return parseInt().filter(n->n >= smaller && n <= larger);
+        return lenientInt().filter(n->n >= smaller && n <= larger);
+    }
+
+    /**
+     * Returns a parser that matches integer ranges, inclusive on both ends.
+     *
+     * @param from First end of the range. May be either the lower or upper bound.
+     * @param to Second end of the range. May be either the lower or upper bound.
+     *
+     * @return A parser that matches integer ranges, inclusive on both ends.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static Parser<Integer> rangeStrict(int from, int to) {
+        int smaller = Math.min(from, to);
+        int larger = Math.max(from, to);
+        return strictInt().filter(n->n >= smaller && n <= larger);
     }
 
     /**
@@ -100,7 +184,23 @@ public class Parsers {
     public static Parser<Long> range(long from, long to) {
         long smaller = Math.min(from, to);
         long larger = Math.max(from, to);
-        return parseLong().filter(n->n >= smaller && n <= larger);
+        return lenientLong().filter(n->n >= smaller && n <= larger);
+    }
+
+    /**
+     * Returns a parser that matches long ranges, inclusive on both ends.
+     *
+     * @param from First end of the range. May be either the lower or upper bound.
+     * @param to Second end of the range. May be either the lower or upper bound.
+     *
+     * @return A parser that matches long ranges, inclusive on both ends.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static Parser<Long> rangeStrict(long from, long to) {
+        long smaller = Math.min(from, to);
+        long larger = Math.max(from, to);
+        return strictLong().filter(n->n >= smaller && n <= larger);
     }
 
     /**

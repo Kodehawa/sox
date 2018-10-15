@@ -17,7 +17,7 @@ import sox.command.argument.Arguments;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -100,22 +100,19 @@ public class Context extends AbstractContext<Context> {
         return message.getAuthor();
     }
 
-    @Nullable
     @CheckReturnValue
     public Member member() {
-        return message.getMember();
+        return Objects.requireNonNull(message.getMember(), "This method cannot be used in DMs");
     }
 
-    @Nonnull
     @CheckReturnValue
     public Guild guild() {
-        return message.getGuild();
+        return Objects.requireNonNull(message.getGuild(), "This method cannot be used in DMs");
     }
 
-    @Nonnull
     @CheckReturnValue
     public TextChannel textChannel() {
-        return message.getTextChannel();
+        return Objects.requireNonNull(message.getTextChannel(), "This method cannot be used in DMs");
     }
 
     @Nonnull

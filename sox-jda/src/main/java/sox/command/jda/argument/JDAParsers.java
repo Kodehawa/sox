@@ -5,9 +5,9 @@ import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.utils.cache.SnowflakeCacheView;
-import sox.command.jda.Context;
 import sox.command.argument.Parser;
 import sox.command.argument.Parsers;
+import sox.command.jda.Context;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -71,7 +71,7 @@ public final class JDAParsers {
     @Nonnull
     @CheckReturnValue
     public static Parser<User> user(boolean useShardManager) {
-        Parser<Long> longParser = Parsers.parseLong();
+        Parser<Long> longParser = Parsers.strictLong();
         return (abstractContext, arguments) -> {
             Context c = (Context)abstractContext;
             JDA jda = c.message().getJDA();

@@ -12,8 +12,8 @@ import sox.service.ServiceManager;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -160,6 +160,27 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
     @Nonnull
     @CheckReturnValue
     public <T> T argument(@Nonnull Parser<T> parser) {
+        return argument(parser, null);
+    }
+
+    /**
+     * Attempts to parse an argument with the provided {@link Parser parser}.
+     * <br>If the parser returns {@link Optional#empty() nothing} or there are
+     * no more arguments to read, an exception is thrown.
+     *
+     * @param parser Parser to use.
+     * @param failureMessage Message to provide to the {@link ArgumentParseError error}
+     *                       thrown on parse failure.
+     * @param <T> Type of the object returned by the parser.
+     *
+     * @return The parsed object.
+     *
+     * @throws ArgumentParseError If there are no more arguments to read or the parser
+     *                            returned nothing.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public <T> T argument(@Nonnull Parser<T> parser, @Nullable String failureMessage) {
         int offset = arguments.getOffset();
         Optional<T> optional;
         if(!arguments.hasNext()) {
@@ -170,7 +191,7 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
         return optional.orElseThrow(()->{
             Arguments copy = arguments.snapshot();
             copy.setOffset(offset);
-            return new ArgumentParseError(this, parser, copy);
+            return new ArgumentParseError(failureMessage, this, parser, copy);
         });
     }
 

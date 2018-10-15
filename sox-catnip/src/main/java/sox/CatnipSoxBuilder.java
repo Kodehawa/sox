@@ -1,10 +1,13 @@
 package sox;
 
 import com.mewna.catnip.entity.message.Message;
+import sox.command.CommandManager;
+import sox.command.argument.ArgumentParseError;
 import sox.command.catnip.CatnipReflectiveCommandManager;
 import sox.command.catnip.Command;
 import sox.command.catnip.Context;
 import sox.command.catnip.PrefixProvider;
+import sox.command.hook.CommandHook;
 import sox.impl.CatnipSoxImpl;
 
 import javax.annotation.CheckReturnValue;
@@ -45,6 +48,18 @@ public class CatnipSoxBuilder extends SoxBuilder<Message, Context, Command, Catn
     public CatnipSoxBuilder deploymentID(@Nonnull String deploymentID) {
         this.deploymentID = deploymentID;
         return this;
+    }
+
+    @Override
+    protected void addDefaultErrorHandlers(CommandManager<Message, Context, Command> manager) {
+        manager.commandHooks().add(CommandHook.fromErrorHandler((context, command, e) -> {
+            if(e instanceof ArgumentParseError) {
+                context.send("Bad argument: " + e.getMessage());
+                return true;
+            }
+            return false;
+        }));
+        super.addDefaultErrorHandlers(manager);
     }
 
     @Override

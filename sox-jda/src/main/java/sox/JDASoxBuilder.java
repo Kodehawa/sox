@@ -1,6 +1,9 @@
 package sox;
 
 import net.dv8tion.jda.core.entities.Message;
+import sox.command.CommandManager;
+import sox.command.argument.ArgumentParseError;
+import sox.command.hook.CommandHook;
 import sox.command.jda.Command;
 import sox.command.jda.Context;
 import sox.command.jda.JDAReflectiveCommandManager;
@@ -37,6 +40,18 @@ public class JDASoxBuilder extends SoxBuilder<Message, Context, Command, JDASoxB
     @CheckReturnValue
     public JDASoxBuilder prefix(@Nonnull PrefixProvider provider) {
         return prefixes(provider);
+    }
+
+    @Override
+    protected void addDefaultErrorHandlers(CommandManager<Message, Context, Command> manager) {
+        manager.commandHooks().add(CommandHook.fromErrorHandler((context, command, e) -> {
+            if(e instanceof ArgumentParseError) {
+                context.send("Bad argument: " + e.getMessage());
+                return true;
+            }
+            return false;
+        }));
+        super.addDefaultErrorHandlers(manager);
     }
 
     @Override

@@ -80,10 +80,14 @@ public abstract class SoxBuilder<M, C extends AbstractContext<C>, CT extends Abs
         CommandManager<M, C, CT> cm = commandManagerFactory.create(impl);
         cm.commandHooks().addAll(hooks);
         if(defaultErrorHandler) {
-            cm.commandHooks().add(CommandHook.fromErrorHandler(CommandErrorHandler.<C, CT>fromConsumer(Exception::printStackTrace)));
+            addDefaultErrorHandlers(cm);
         }
         impl.registerCommandManager(cm);
         return impl;
+    }
+
+    protected void addDefaultErrorHandlers(CommandManager<M, C, CT> manager) {
+        manager.commandHooks().add(CommandHook.fromErrorHandler(CommandErrorHandler.<C, CT>fromConsumer(Exception::printStackTrace)));
     }
 
     @Nonnull

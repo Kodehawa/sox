@@ -10,8 +10,8 @@ public class ArgumentParseError extends RuntimeException {
     private final Parser parser;
     private final Arguments readArguments;
 
-    public ArgumentParseError(AbstractContext context, Parser parser, Arguments readArguments) {
-        super("Unable to parse argument using parser " + parser + " and arguments " + readArguments);
+    public ArgumentParseError(String message, AbstractContext context, Parser parser, Arguments readArguments) {
+        super(messageString(message, parser, readArguments));
         this.context = context;
         this.parser = parser;
         this.readArguments = readArguments;
@@ -42,5 +42,10 @@ public class ArgumentParseError extends RuntimeException {
      */
     public Arguments readArguments() {
         return readArguments;
+    }
+
+    private static String messageString(String message, Parser parser, Arguments readArguments) {
+        if(message != null) return message;
+        return "Unable to parse argument using parser " + parser + " and arguments " + readArguments;
     }
 }

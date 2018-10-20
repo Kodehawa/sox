@@ -11,7 +11,7 @@ class SelfInfoHolder {
 
     CompletionStage<State> fetch(Catnip catnip) {
         if(state != null) return CompletableFuture.completedFuture(state);
-        User self = catnip.cache().selfUser();
+        User self = catnip.selfUser();
         CompletionStage<User> fetchSelf;
         if(self != null) {
             fetchSelf = CompletableFuture.completedFuture(self);

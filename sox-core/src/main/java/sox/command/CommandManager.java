@@ -3,6 +3,7 @@ package sox.command;
 import sox.Sox;
 import sox.command.argument.Arguments;
 import sox.command.argument.split.StringSplitter;
+import sox.command.dispatch.CommandDispatcher;
 import sox.command.hook.CommandHook;
 import sox.util.ListFactory;
 import sox.util.MapFactory;
@@ -19,12 +20,14 @@ public abstract class CommandManager<M, C extends AbstractContext<C>, T extends 
     private static final StringSplitter SPLITTER = new StringSplitter();
 
     private final Sox sox;
+    private final CommandDispatcher dispatcher;
     private final Map<String, T> commands;
     private final Map<String, String> aliases;
     private final List<CommandHook<C, T>> commandHooks;
 
     public CommandManager(@Nonnull Sox sox, @Nonnull MapFactory mapFactory, @Nonnull ListFactory listFactory) {
         this.sox = sox;
+        this.dispatcher = sox.dispatcher();
         this.commands = mapFactory.create();
         this.aliases = mapFactory.create();
         this.commandHooks = listFactory.create();
@@ -73,7 +76,7 @@ public abstract class CommandManager<M, C extends AbstractContext<C>, T extends 
                     hook.beforeCommand(context, finalCommand);
                 }
                 try {
-                    finalCommand.process(context);
+                    dispatcher.dispatch(finalCommand, context);
                     for(CommandHook<C, T> hook : commandSpecificHooks) {
                         hook.afterCommand(context, finalCommand);
                     }

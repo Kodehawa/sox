@@ -4,6 +4,7 @@ import sox.Sox;
 import sox.command.AbstractCommand;
 import sox.command.AbstractContext;
 import sox.command.CommandManager;
+import sox.command.dispatch.CommandDispatcher;
 import sox.inject.Injector;
 import sox.service.ServiceManager;
 
@@ -13,6 +14,7 @@ import java.util.function.Consumer;
 
 public abstract class SoxImpl<M, C extends AbstractContext<C>, T extends AbstractCommand<C, T>> implements Sox, Consumer<M> {
     protected final AtomicReference<CommandManager<M, C, T>> commandManagerReference = new AtomicReference<>();
+    protected final AtomicReference<CommandDispatcher> commandDispatcherReference = new AtomicReference<>();
     protected final ServiceManager serviceManager;
     protected final Injector injector;
 
@@ -26,9 +28,15 @@ public abstract class SoxImpl<M, C extends AbstractContext<C>, T extends Abstrac
 
     public void registerCommandManager(CommandManager<M, C, T> commandManager) {
         if(!commandManagerReference.compareAndSet(null, commandManager)) {
-            throw new IllegalStateException("AbstractCommand manager already set!");
+            throw new IllegalStateException("Command manager already set!");
         }
         serviceManager.registerService(commandManager);
+    }
+
+    public void registerCommandDispatcher(CommandDispatcher dispatcher) {
+        if(!commandDispatcherReference.compareAndSet(null, dispatcher)) {
+            throw new IllegalStateException("Command dispatcher already set!");
+        }
     }
 
     public void withCommandManager(Consumer<CommandManager<M, C, T>> action) {
@@ -58,5 +66,15 @@ public abstract class SoxImpl<M, C extends AbstractContext<C>, T extends Abstrac
     @Override
     public Injector injector() {
         return injector;
+    }
+
+    @Nonnull
+    @Override
+    public CommandDispatcher dispatcher() {
+        CommandDispatcher cd = commandDispatcherReference.get();
+        if(cd == null) {
+            throw new IllegalStateException("No command dispatcher set!");
+        }
+        return cd;
     }
 }

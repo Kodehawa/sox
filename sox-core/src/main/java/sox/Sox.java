@@ -2,6 +2,7 @@ package sox;
 
 import sox.command.AbstractCommand;
 import sox.command.CommandManager;
+import sox.command.dispatch.CommandDispatcher;
 import sox.inject.Injector;
 import sox.service.ServiceManager;
 
@@ -35,6 +36,10 @@ public interface Sox {
     @Nonnull
     @CheckReturnValue
     Injector injector();
+
+    @Nonnull
+    @CheckReturnValue
+    CommandDispatcher dispatcher();
 
     /**
      * Registers a command by class.

@@ -6,6 +6,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Set;
  * for in a {@link ServiceManager service manager}.
  */
 public class Injector {
-    private static final Comparator<Constructor<?>> CONSTRUCTOR_COMPARATOR = new ConstructorComparator();
+    public static final Comparator<Executable> EXECUTABLE_COMPARATOR = new ExecutableComparator();
 
     private final ServiceManager serviceManager;
 
@@ -64,7 +65,7 @@ public class Injector {
                 list.add(constructor);
             }
         }
-        list.sort(CONSTRUCTOR_COMPARATOR);
+        list.sort(EXECUTABLE_COMPARATOR);
         for(Constructor<?> constructor : list) {
             Object instance = tryConstructor(constructor);
             if(instance != null) {
@@ -152,9 +153,9 @@ public class Injector {
         }
     }
 
-    private static class ConstructorComparator implements Comparator<Constructor<?>> {
+    private static class ExecutableComparator implements Comparator<Executable> {
         @Override
-        public int compare(Constructor<?> o1, Constructor<?> o2) {
+        public int compare(Executable o1, Executable o2) {
             int i = compareWeights(o1, o2);
             if(i != 0) return i;
             Class<?>[] args1 = o1.getParameterTypes();
@@ -164,7 +165,7 @@ public class Injector {
             return compareSpecificity(args1, args2);
         }
 
-        private static int compareWeights(Constructor<?> o1, Constructor<?> o2) {
+        private static int compareWeights(Executable o1, Executable o2) {
             InjectWeight w1 = o1.getAnnotation(InjectWeight.class);
             InjectWeight w2 = o2.getAnnotation(InjectWeight.class);
             if(w1 == null && w2 == null) return 0;

@@ -254,7 +254,33 @@ public class Parsers {
     @Nonnull
     @CheckReturnValue
     public static <T extends Enum<T>> Parser<T> toEnum(@Nonnull Class<T> enumClass) {
-        return new CatchingParser<>(s->Enum.valueOf(enumClass, s));
+        return toEnum(enumClass, false);
+    }
+
+    /**
+     * Returns a parser that matches enum values.
+     *
+     * @param enumClass Class of the enum.  May not be null.
+     * @param ignoreCase Ignore case when matching the enum values.
+     * @param <T> Enum type.
+     *
+     * @return A parser that matches enum values.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public static <T extends Enum<T>> Parser<T> toEnum(@Nonnull Class<T> enumClass, boolean ignoreCase) {
+        T[] constants = enumClass.getEnumConstants();
+        return (__, arguments) -> {
+            String name = arguments.next().getValue();
+            for(T t : constants) {
+                if(ignoreCase) {
+                    if(t.name().equalsIgnoreCase(name)) return Optional.of(t);
+                } else {
+                    if(t.name().equals(name)) return Optional.of(t);
+                }
+            }
+            return Optional.empty();
+        };
     }
 
     /**

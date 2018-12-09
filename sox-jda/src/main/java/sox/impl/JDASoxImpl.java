@@ -1,14 +1,22 @@
 package sox.impl;
 
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
 import sox.command.CommandManager;
+import sox.command.dispatch.CommandDispatcher;
+import sox.command.dispatch.DynamicCommandDispatcher;
+import sox.command.dispatch.ParserRegistry;
 import sox.command.jda.Command;
 import sox.command.jda.Context;
 import sox.command.jda.PrefixProvider;
+import sox.command.jda.argument.JDAParsers;
+import sox.command.jda.dispatch.config.CurrentShard;
 
+import java.lang.annotation.Annotation;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,6 +25,21 @@ public class JDASoxImpl extends SoxImpl<Message, Context, Command> implements Ev
 
     public JDASoxImpl(List<PrefixProvider> prefixProviders) {
         this.prefixProviders = prefixProviders;
+    }
+
+    @Override
+    public void registerCommandDispatcher(CommandDispatcher dispatcher) {
+        if(dispatcher instanceof DynamicCommandDispatcher) {
+            ParserRegistry r = ((DynamicCommandDispatcher)dispatcher).registry();
+            r.register(User.class, (__1, __2, annotations) -> {
+                for(Annotation a : annotations) {
+                    if(a instanceof CurrentShard) return JDAParsers.user(false);
+                }
+                return JDAParsers.user(true);
+            });
+            r.register(Member.class, JDAParsers.member());
+        }
+        super.registerCommandDispatcher(dispatcher);
     }
 
     @Override

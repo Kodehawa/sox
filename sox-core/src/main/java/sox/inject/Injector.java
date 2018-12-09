@@ -166,8 +166,8 @@ public class Injector {
         }
 
         private static int compareWeights(Executable o1, Executable o2) {
-            InjectWeight w1 = o1.getAnnotation(InjectWeight.class);
-            InjectWeight w2 = o2.getAnnotation(InjectWeight.class);
+            Weight w1 = o1.getAnnotation(Weight.class);
+            Weight w2 = o2.getAnnotation(Weight.class);
             if(w1 == null && w2 == null) return 0;
             if(w1 == null) {
                 return 1;

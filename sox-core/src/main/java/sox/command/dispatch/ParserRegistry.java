@@ -1,7 +1,6 @@
 package sox.command.dispatch;
 
 import sox.command.AbstractContext;
-import sox.command.argument.MarkedBlock;
 import sox.command.argument.Parser;
 import sox.command.argument.Parsers;
 import sox.command.dispatch.config.AllowedProtocols;
@@ -9,7 +8,6 @@ import sox.command.dispatch.config.Http;
 import sox.command.dispatch.config.IgnoreCase;
 import sox.command.dispatch.config.Joining;
 import sox.command.dispatch.config.Matching;
-import sox.command.dispatch.config.NotEmpty;
 import sox.command.dispatch.config.RemainingContent;
 import sox.command.dispatch.factory.CollectionParserFactory;
 import sox.command.dispatch.factory.DynamicParserFactory;
@@ -33,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.stream.Stream;
 
 public class ParserRegistry {
     private static final Map<TypeWrapper, ParserFactory> DEFAULT_FACTORIES = new HashMap<TypeWrapper, ParserFactory>(){{
@@ -49,24 +49,13 @@ public class ParserRegistry {
         put(wrap(double.class), wrap(Parsers.parseDouble()));
         put(wrap(Double.class), wrap(Parsers.parseDouble()));
 
-        put(wrap(List.class), new CollectionParserFactory(ArrayList::new));
-        put(wrap(Set.class), new CollectionParserFactory(HashSet::new));
-        put(wrap(Collection.class), new CollectionParserFactory(ArrayList::new));
-        put(wrap(Iterable.class), new CollectionParserFactory(ArrayList::new));
-        put(wrap(Iterator.class), (registry, types, annotations) -> {
-            Parser<?> elementParser = registry.resolve(types[0], annotations);
-            boolean notEmpty = has(annotations, NotEmpty.class);
-            return (context, arguments) -> {
-                Collection<?> collection = new ArrayList<>();
-                MarkedBlock block = arguments.marked();
-                for(Optional<?> element = context.tryArgument(elementParser); element.isPresent(); element = context.tryArgument(elementParser)) {
-                    collection.add(uncheckedCast(element.get()));
-                    block.mark();
-                }
-                block.reset();
-                return notEmpty && collection.isEmpty() ? Optional.empty() : Optional.of(collection.iterator());
-            };
-        });
+        put(wrap(List.class), new CollectionParserFactory<>(ArrayList::new));
+        put(wrap(Set.class), new CollectionParserFactory<>(HashSet::new));
+        put(wrap(Collection.class), new CollectionParserFactory<>(ArrayList::new));
+        put(wrap(Iterable.class), new CollectionParserFactory<>(ArrayList::new));
+        put(wrap(Stream.class), new CollectionParserFactory<>(ArrayList::new).map(Collection::stream));
+        put(wrap(Spliterator.class), new CollectionParserFactory<>(ArrayList::new).map(Iterable::spliterator));
+        put(wrap(Iterator.class), new CollectionParserFactory<>(ArrayList::new).map(Iterable::iterator));
 
         put(wrap(URL.class), (__1, __2, annotations) -> {
             List<String> list = new ArrayList<>();

@@ -40,7 +40,7 @@ subprojects {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 subprojects {
-    def versionObj = new Version(major: 0, minor: 2, revision: 0)
+    def versionObj = new Version(major: 0, minor: 2, revision: 1)
 
     group 'com.github.natanbc'
     version "${versionObj}"

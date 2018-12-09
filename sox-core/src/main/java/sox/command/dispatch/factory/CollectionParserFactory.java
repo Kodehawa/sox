@@ -11,22 +11,22 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class CollectionParserFactory implements ParserFactory {
-    private final Supplier<? extends Collection<?>> collectionFactory;
+public class CollectionParserFactory<T> implements ParserFactory<Collection<T>> {
+    private final Supplier<? extends Collection<T>> collectionFactory;
 
-    public CollectionParserFactory(Supplier<? extends Collection<?>> collectionFactory) {
+    public CollectionParserFactory(Supplier<? extends Collection<T>> collectionFactory) {
         this.collectionFactory = collectionFactory;
     }
 
     @Override
-    public Parser<?> create(ParserRegistry registry, Type[] typeParameters, Annotation[] annotations) {
+    public Parser<Collection<T>> create(ParserRegistry registry, Type[] typeParameters, Annotation[] annotations) {
         if(typeParameters.length == 0) {
             throw new IllegalArgumentException("Raw types are not supported");
         }
         Parser<?> elementParser = registry.resolve(typeParameters[0], annotations);
         boolean notEmpty = hasNotEmpty(annotations);
         return (context, arguments) -> {
-            Collection<?> collection = collectionFactory.get();
+            Collection<T> collection = collectionFactory.get();
             MarkedBlock block = arguments.marked();
             for(Optional<?> element = context.tryArgument(elementParser); element.isPresent(); element = context.tryArgument(elementParser)) {
                 collection.add(uncheckedCast(element.get()));

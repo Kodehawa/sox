@@ -1,7 +1,9 @@
 package sox.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.DiscordEvent;
@@ -12,6 +14,10 @@ import sox.command.CommandManager;
 import sox.command.catnip.Command;
 import sox.command.catnip.Context;
 import sox.command.catnip.PrefixProvider;
+import sox.command.catnip.argument.CatnipParsers;
+import sox.command.dispatch.CommandDispatcher;
+import sox.command.dispatch.DynamicCommandDispatcher;
+import sox.command.dispatch.ParserRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -31,6 +37,16 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context, Command> implements
     public CatnipSoxImpl(List<PrefixProvider> prefixProviders, String deploymentID) {
         this.prefixProviders = prefixProviders;
         this.deploymentID = deploymentID;
+    }
+
+    @Override
+    public void registerCommandDispatcher(CommandDispatcher dispatcher) {
+        if(dispatcher instanceof DynamicCommandDispatcher) {
+            ParserRegistry r = ((DynamicCommandDispatcher)dispatcher).registry();
+            r.register(User.class, CatnipParsers.user());
+            r.register(Member.class, CatnipParsers.member());
+        }
+        super.registerCommandDispatcher(dispatcher);
     }
 
     @Override

@@ -5,7 +5,12 @@ import sox.command.dispatch.ParserRegistry;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
-public interface ParserFactory {
-    Parser<?> create(ParserRegistry registry, Type[] typeParameters, Annotation[] argumentAnnotations);
+public interface ParserFactory<T> {
+    Parser<T> create(ParserRegistry registry, Type[] typeParameters, Annotation[] argumentAnnotations);
+
+    default <U> ParserFactory<U> map(Function<T, U> mapper) {
+        return (r, t, a) -> create(r, t, a).map(mapper);
+    }
 }

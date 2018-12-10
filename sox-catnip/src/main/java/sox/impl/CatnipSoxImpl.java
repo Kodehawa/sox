@@ -60,13 +60,20 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context, Command> implements
 
     private static void tryNextPrefix(CommandManager<Message, Context, Command> manager, Iterator<PrefixProvider> providers, Message message) {
         if(!providers.hasNext()) return;
-        providers.next().getPrefix(manager.sox(), message)
-                .handle((prefix, error) -> {
-                    if(prefix == null || error != null) {
+        providers.next().getPrefixes(manager.sox(), message)
+                .handle((prefixes, error) -> {
+                    if(prefixes.isEmpty() || error != null) {
                         tryNextPrefix(manager, providers, message);
                         return null;
                     }
-                    manager.process(message, message.content().trim().substring(prefix.length()).trim());
+                    String content = message.content();
+                    for(String prefix : prefixes) {
+                        if(content.startsWith(prefix)) {
+                            manager.process(message, content.substring(prefix.length()).trim());
+                            return null;
+                        }
+                    }
+                    tryNextPrefix(manager, providers, message);
                     return null;
                 });
     }

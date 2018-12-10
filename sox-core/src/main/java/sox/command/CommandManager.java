@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class CommandManager<M, C extends AbstractContext<C>, T extends AbstractCommand<C, T>> {
     private static final StringSplitter SPLITTER = new StringSplitter();
 
+    private final AtomicReference<UnmatchedCommandHandler<M>> unmatchedCommandHandlerReference = new AtomicReference<>();
     private final Sox sox;
     private final CommandDispatcher dispatcher;
     private final Map<String, T> commands;
@@ -37,6 +39,10 @@ public abstract class CommandManager<M, C extends AbstractContext<C>, T extends 
         this(sox, HashMap::new, ArrayList::new);
     }
 
+    public UnmatchedCommandHandler<M> unmatchedCommandHandler() {
+        return unmatchedCommandHandlerReference.get();
+    }
+
     public Sox sox() {
         return sox;
     }
@@ -49,10 +55,24 @@ public abstract class CommandManager<M, C extends AbstractContext<C>, T extends 
         return commandHooks;
     }
 
+    public void setUnmatchedCommandHandler(UnmatchedCommandHandler<M> handler, boolean override) {
+        if(override) {
+            unmatchedCommandHandlerReference.set(handler);
+        } else {
+            unmatchedCommandHandlerReference.compareAndSet(null, handler);
+        }
+    }
+
     public void process(M message, String content) {
         String[] parts = SPLITTER.rawSplit(content, 2);
         T command = command(parts[0].toLowerCase());
-        if(command == null) return;
+        if(command == null) {
+            UnmatchedCommandHandler<M> h = unmatchedCommandHandlerReference.get();
+            if(h != null) {
+                h.handleUnmatchedCommand(message);
+            }
+            return;
+        }
         while(true) {
             content = parts.length == 1 ? "" : parts[1];
             parts = CommandManager.SPLITTER.rawSplit(content, 2);

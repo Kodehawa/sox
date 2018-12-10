@@ -3,6 +3,7 @@ package sox;
 import sox.command.AbstractCommand;
 import sox.command.AbstractContext;
 import sox.command.CommandManager;
+import sox.command.UnmatchedCommandHandler;
 import sox.command.dispatch.CommandDispatcher;
 import sox.command.dispatch.StaticCommandDispatcher;
 import sox.command.hook.AfterCommand;
@@ -15,6 +16,7 @@ import sox.util.CommandManagerFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,7 @@ public abstract class SoxBuilder<M, C extends AbstractContext<C>, CT extends Abs
     protected boolean defaultErrorHandler = true;
     protected CommandManagerFactory<M, C, CT> commandManagerFactory;
     protected CommandDispatcher dispatcher = new StaticCommandDispatcher();
+    protected UnmatchedCommandHandler<M> unmatchedCommandHandler;
 
     protected SoxBuilder(CommandManagerFactory<M, C, CT> factory) {
         this.commandManagerFactory = factory;
@@ -83,11 +86,18 @@ public abstract class SoxBuilder<M, C extends AbstractContext<C>, CT extends Abs
     }
 
     @Nonnull
+    public T unmatchedCommandHandler(@Nullable UnmatchedCommandHandler<M> handler) {
+        this.unmatchedCommandHandler = handler;
+        return asActualType();
+    }
+
+    @Nonnull
     @CheckReturnValue
     public Sox build() {
         SoxImpl<M, C, CT> impl = newInstance();
         impl.registerCommandDispatcher(dispatcher);
         CommandManager<M, C, CT> cm = commandManagerFactory.create(impl);
+        cm.setUnmatchedCommandHandler(unmatchedCommandHandler, true);
         cm.commandHooks().addAll(hooks);
         if(defaultErrorHandler) {
             addDefaultErrorHandlers(cm);

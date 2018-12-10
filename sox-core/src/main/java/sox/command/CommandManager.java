@@ -69,7 +69,7 @@ public abstract class CommandManager<M, C extends AbstractContext<C>, T extends 
         if(command == null) {
             UnmatchedCommandHandler<M> h = unmatchedCommandHandlerReference.get();
             if(h != null) {
-                h.handleUnmatchedCommand(message);
+                h.handleUnmatchedCommand(sox, message, parts[0], parts.length == 1 ? "" : parts[1]);
             }
             return;
         }

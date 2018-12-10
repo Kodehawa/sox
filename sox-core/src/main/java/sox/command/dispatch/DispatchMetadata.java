@@ -26,7 +26,7 @@ class DispatchMetadata {
 
     <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> void dispatch(T command, C context) {
         for(Handler h : handlers) {
-            if(h.handle(command, context)) return;
+            if(h.handle(command, context.snapshot())) return;
         }
         command.process(context);
     }

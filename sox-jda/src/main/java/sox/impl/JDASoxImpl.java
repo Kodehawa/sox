@@ -1,8 +1,11 @@
 package sox.impl;
 
+import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
@@ -38,6 +41,9 @@ public class JDASoxImpl extends SoxImpl<Message, Context, Command> implements Ev
                 return JDAParsers.user(true);
             });
             r.register(Member.class, JDAParsers.member());
+            r.register(TextChannel.class, JDAParsers.textChannel());
+            r.register(VoiceChannel.class, JDAParsers.voiceChannel());
+            r.register(Category.class, JDAParsers.category());
         }
         super.registerCommandDispatcher(dispatcher);
     }

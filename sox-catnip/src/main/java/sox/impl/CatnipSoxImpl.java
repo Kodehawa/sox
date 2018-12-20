@@ -1,6 +1,9 @@
 package sox.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.channel.Category;
+import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.channel.VoiceChannel;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.user.User;
@@ -45,6 +48,9 @@ public class CatnipSoxImpl extends SoxImpl<Message, Context, Command> implements
             ParserRegistry r = ((DynamicCommandDispatcher)dispatcher).registry();
             r.register(User.class, CatnipParsers.user());
             r.register(Member.class, CatnipParsers.member());
+            r.register(TextChannel.class, CatnipParsers.textChannel());
+            r.register(VoiceChannel.class, CatnipParsers.voiceChannel());
+            r.register(Category.class, CatnipParsers.category());
         }
         super.registerCommandDispatcher(dispatcher);
     }

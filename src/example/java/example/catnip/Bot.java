@@ -25,7 +25,7 @@ public class Bot {
 
         Catnip.catnip(System.getenv("BOT_TOKEN"))
                 .loadExtension((Extension) sox)
-                .startShards();
+                .connect();
 
         System.out.println("Try the following commands:");
         sox.commandManager().commands().keySet().forEach(c -> {

@@ -4,10 +4,12 @@ import sox.command.catnip.Command;
 import sox.command.catnip.Context;
 import sox.command.dispatch.DispatchIgnore;
 import sox.command.dispatch.config.NotEmpty;
+import sox.inject.Weight;
 
 import java.util.List;
 
 public class DynamicDispatch extends Command {
+    @Weight(1) //force it to have a higher priority than other methods
     public void process(@NotEmpty List<Integer> integers) {
         System.out.println("integers = " + integers);
     }

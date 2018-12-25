@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
  * When more than one is present, the priority order is
  * <ul>
  *     <li>{@link Matching match}</li>
+ *     <li>{@link DelimitedBy delimited by}</li>
  *     <li>{@link Joining joining}</li>
  *     <li>{@link RemainingContent remaining}</li>
  * </ul>

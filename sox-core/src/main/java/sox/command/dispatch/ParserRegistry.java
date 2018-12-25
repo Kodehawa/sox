@@ -4,15 +4,17 @@ import sox.command.AbstractContext;
 import sox.command.argument.Parser;
 import sox.command.argument.Parsers;
 import sox.command.dispatch.config.AllowedProtocols;
+import sox.command.dispatch.config.DelimitedBy;
 import sox.command.dispatch.config.Http;
 import sox.command.dispatch.config.IgnoreCase;
 import sox.command.dispatch.config.Joining;
+import sox.command.dispatch.config.Lenient;
 import sox.command.dispatch.config.Matching;
+import sox.command.dispatch.config.Range;
 import sox.command.dispatch.config.RemainingContent;
 import sox.command.dispatch.factory.CollectionParserFactory;
 import sox.command.dispatch.factory.DynamicParserFactory;
 import sox.command.dispatch.factory.ParserFactory;
-import sox.command.dispatch.factory.PossiblyLenientParserFactory;
 import sox.util.ListFactory;
 import sox.util.MapFactory;
 
@@ -36,11 +38,25 @@ import java.util.stream.Stream;
 
 public class ParserRegistry {
     private static final Map<TypeWrapper, ParserFactory> DEFAULT_FACTORIES = new HashMap<TypeWrapper, ParserFactory>(){{
-        ParserFactory intFactory = new PossiblyLenientParserFactory(Parsers.strictInt(), Parsers.lenientInt());
+        ParserFactory<Integer> intFactory =
+                ParserFactory.of(Parsers.strictInt())
+                .replaceIfPresent(Lenient.class, Parsers.lenientInt())
+                .mapIfPresent(Range.class, (parser, range) -> {
+                    long min = Math.min(range.from(), range.to());
+                    long max = Math.max(range.from(), range.to());
+                    return parser.filter(v -> v >= min && v <= max);
+                });
         put(wrap(int.class), intFactory);
         put(wrap(Integer.class), intFactory);
 
-        ParserFactory longFactory = new PossiblyLenientParserFactory(Parsers.strictLong(), Parsers.lenientLong());
+        ParserFactory<Long> longFactory =
+                ParserFactory.of(Parsers.strictLong())
+                .replaceIfPresent(Lenient.class, Parsers.lenientLong())
+                .mapIfPresent(Range.class, (parser, range) -> {
+                    long min = Math.min(range.from(), range.to());
+                    long max = Math.max(range.from(), range.to());
+                    return parser.filter(v -> v >= min && v <= max);
+                });
         put(wrap(long.class), longFactory);
         put(wrap(Long.class), longFactory);
 
@@ -70,19 +86,18 @@ public class ParserRegistry {
             return list.isEmpty() ? Parsers.url() : Parsers.url(list);
         });
 
-        put(wrap(String.class), (__1, __2, annotations) -> {
-            Matching m = find(annotations, Matching.class);
-            if(m != null) {
-                return Parsers.matching(m.pattern(), m.flags());
+        put(wrap(String.class), ParserFactory.of(Parsers.string())
+            .replaceIfPresent(RemainingContent.class, Parsers.remainingContent())
+            .replaceIfPresent(Joining.class, j -> Parsers.remainingArguments(j.separator()))
+            .replaceIfPresent(DelimitedBy.class, d -> Parsers.delimitedBy(d.delimiter(), d.allowEscaping()))
+            .replaceIfPresent(Matching.class, m -> Parsers.matching(m.pattern(), m.flags()))
+        );
+
+        put(wrap(Optional.class), (registry, typeParameters, annotations) -> {
+            if(typeParameters.length == 0) {
+                throw new IllegalArgumentException("Raw types are not supported");
             }
-            Joining j = find(annotations, Joining.class);
-            if(j != null) {
-                return Parsers.remainingArguments(j.separator());
-            }
-            if(has(annotations, RemainingContent.class)) {
-                return Parsers.remainingContent();
-            }
-            return Parsers.string();
+            return Parsers.option(registry.resolve(typeParameters[0], annotations));
         });
     }};
     @SuppressWarnings("unchecked")
@@ -187,11 +202,6 @@ public class ParserRegistry {
             if(annotationClass.isInstance(a)) return annotationClass.cast(a);
         }
         return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T uncheckedCast(Object object) {
-        return (T)object;
     }
 
     //used for overriding equals check

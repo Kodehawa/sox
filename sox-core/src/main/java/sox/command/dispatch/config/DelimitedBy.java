@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Ensures the string matches the provided pattern.
+ * Returns a string delimited by the provided delimiter.
  *
  * When more than one is present, the priority order is
  * <ul>
@@ -21,10 +21,12 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>{@link String strings}</li>
  * </ul>
+ *
+ * @see sox.command.argument.Parsers#delimitedBy(char, boolean)
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Matching {
-    String pattern();
-    int flags() default 0;
+public @interface DelimitedBy {
+    char delimiter();
+    boolean allowEscaping() default true;
 }

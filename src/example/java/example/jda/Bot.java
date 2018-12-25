@@ -24,8 +24,7 @@ public class Bot {
 
         AutoRegister.jda("example.jda").into(sox);
 
-        new JDABuilder()
-                .setToken(System.getenv("BOT_TOKEN"))
+        new JDABuilder(System.getenv("BOT_TOKEN"))
                 .addEventListener(sox)
                 .build();
 

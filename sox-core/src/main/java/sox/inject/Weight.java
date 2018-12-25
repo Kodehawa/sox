@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Provides a weight for a constructor.
+ * Provides a weight for a constructor/method.
  *
- * When choosing the constructor order, the following comparisons are used, given two constructors:
+ * When choosing the order, the following comparisons are used, given two constructors:
  * <ul>
  *     <li>If only one has a weight, it's attempted before</li>
  *     <li>If both have weights, the one with higher weight is attempted before</li>
@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.CONSTRUCTOR)
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface Weight {
     int value();
 }

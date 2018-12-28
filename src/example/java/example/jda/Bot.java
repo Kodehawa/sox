@@ -4,12 +4,15 @@ import net.dv8tion.jda.core.JDABuilder;
 import sox.JDASoxBuilder;
 import sox.Sox;
 import sox.autoregister.AutoRegister;
+import sox.command.ContextKey;
 import sox.command.dispatch.DynamicCommandDispatcher;
 import sox.command.jda.PrefixProvider;
 
 import javax.security.auth.login.LoginException;
 
 public class Bot {
+    private static final ContextKey<Long> START_TIME = new ContextKey<>(Long.class, 0L);
+
     public static void main(String[] args) throws LoginException {
         Sox sox = new JDASoxBuilder()
                 .commandDispatcher(new DynamicCommandDispatcher())
@@ -19,6 +22,11 @@ public class Bot {
                         return context.author().getId().equals("your id");
                     }
                     return true;
+                })
+                .beforeCommands((context, command) -> context.put(START_TIME, System.currentTimeMillis()))
+                .afterCommands((context, command) -> {
+                    long duration = System.currentTimeMillis() - context.get(START_TIME);
+                    System.out.println("Command " + command.name() + " took " + duration + "ms to execute");
                 })
                 .build();
 

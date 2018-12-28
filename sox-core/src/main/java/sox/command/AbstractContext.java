@@ -15,26 +15,34 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
 /**
  * Utility class containing the context of a command call.
+ *
  * <br>Provides helpers for parsing arguments in an user friendly way
  * and handling command-local state, which only lives as long as the
  * command call does.
+ *
+ * <br>Context instances are <b>not</b> guaranteed to be thread safe,
+ * unless otherwise specified in a subclass.
  *
  * @param <C> Type of the context implementation.
  */
 public abstract class AbstractContext<C extends AbstractContext<C>> {
     protected final Sox sox;
     protected final Arguments arguments;
+    protected final Map<ContextKey<?>, Object> customProperties;
     protected ServiceManager serviceManager;
 
-    protected AbstractContext(@Nonnull Sox sox, @Nonnull Arguments arguments) {
+    protected AbstractContext(@Nonnull Sox sox, @Nonnull Arguments arguments,
+                              @Nonnull Map<ContextKey<?>, Object> customProperties) {
         this.sox = sox;
         this.arguments = arguments;
+        this.customProperties = customProperties;
     }
 
     /**
@@ -80,8 +88,10 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
 
     /**
      * Creates a best-effort copy of this context.
+     *
      * <br>Being a best-effort, the copy is not guaranteed to be a fully isolated
      * object, and certain changes made to it might affect the original.
+     *
      * <br>State stored by fields of subclasses, or in services registered
      * to the {@link #serviceManager() service manager} is not required to be
      * copied.
@@ -297,5 +307,34 @@ public abstract class AbstractContext<C extends AbstractContext<C>> {
             }
         }
         return list;
+    }
+
+    /**
+     * Stores a custom property in this context.
+     *
+     * @param key Key to store the value.
+     * @param value Value to store.
+     * @param <T> Type of the value being stored.
+     *
+     * @return {@code this}, for chaining calls.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> C put(@Nonnull ContextKey<T> key, T value) {
+        customProperties.put(key, value);
+        return (C)this;
+    }
+
+    /**
+     * Gets a custom property from this context, or it's default value
+     * if absent.
+     *
+     * @param key Key to read the value.
+     * @param <T> Type of the value being read.
+     *
+     * @return Stored value, or the {@link ContextKey#defaultValue() default} if missing.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T get(@Nonnull ContextKey<T> key) {
+        return (T)customProperties.getOrDefault(key, key.defaultValue());
     }
 }

@@ -17,6 +17,7 @@ import sox.command.argument.Arguments;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
@@ -27,7 +28,7 @@ public class Context extends AbstractContext<Context> {
     private final Message message;
 
     protected Context(@Nonnull Sox sox, @Nonnull Arguments arguments, @Nonnull Message message) {
-        super(sox, arguments);
+        super(sox, arguments, new HashMap<>());
         this.message = message;
     }
 
@@ -74,6 +75,7 @@ public class Context extends AbstractContext<Context> {
         if(serviceManager != null) {
             context.serviceManager = serviceManager.snapshot();
         }
+        context.customProperties.putAll(customProperties);
         return context;
     }
 

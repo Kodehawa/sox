@@ -23,7 +23,6 @@ public class DynamicDispatch extends Command {
         System.out.println("this method will be ignored by the dispatcher");
     }
 
-    @Override
     public void process(Context context) {
         context.send("default case");
     }

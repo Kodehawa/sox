@@ -16,7 +16,6 @@ import sox.command.meta.Usage;
 @Usage("!meta or !example-alias")
 @Alias("example-alias")
 public class CommandMeta extends Command {
-    @Override
     public void process(Context context) {
         context.send("some property = " + meta("some property"));
         context.send("I'm in category " + category());

@@ -16,7 +16,6 @@ public class ArgParser extends Command {
         });
     }
 
-    @Override
     public void process(Context context) {
         context.send("Argument is " + context.argument(Parsers.strictInt()));
     }

@@ -22,13 +22,16 @@ class DispatchMetadata {
                 .sorted(Injector.EXECUTABLE_COMPARATOR)
                 .map(m -> new Handler(m, registry.resolve(m)))
                 .toArray(Handler[]::new);
+        if(this.handlers.length == 0) {
+            throw new IllegalStateException("Command " + commandClass + " has no valid handler methods");
+        }
     }
 
     <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> void dispatch(T command, C context) {
         for(Handler h : handlers) {
             if(h.handle(command, context.snapshot())) return;
         }
-        command.process(context);
+        command.noMatches(context);
     }
 
     private static class Handler {

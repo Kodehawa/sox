@@ -5,7 +5,7 @@ import sox.command.AbstractContext;
 import sox.command.CommandManager;
 import sox.command.UnmatchedCommandHandler;
 import sox.command.dispatch.CommandDispatcher;
-import sox.command.dispatch.StaticCommandDispatcher;
+import sox.command.dispatch.DynamicCommandDispatcher;
 import sox.command.hook.AfterCommand;
 import sox.command.hook.BeforeCommand;
 import sox.command.hook.CommandErrorHandler;
@@ -30,7 +30,7 @@ public abstract class SoxBuilder<M, C extends AbstractContext<C>, CT extends Abs
     protected final List<CommandHook<C, CT>> hooks = new ArrayList<>();
     protected boolean defaultErrorHandler = true;
     protected CommandManagerFactory<M, C, CT> commandManagerFactory;
-    protected CommandDispatcher dispatcher = new StaticCommandDispatcher();
+    protected CommandDispatcher dispatcher = new DynamicCommandDispatcher();
     protected UnmatchedCommandHandler<M> unmatchedCommandHandler;
 
     protected SoxBuilder(CommandManagerFactory<M, C, CT> factory) {

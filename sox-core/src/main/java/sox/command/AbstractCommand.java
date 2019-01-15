@@ -1,5 +1,6 @@
 package sox.command;
 
+import org.slf4j.LoggerFactory;
 import sox.command.hook.AfterCommand;
 import sox.command.hook.BeforeCommand;
 import sox.command.hook.CommandErrorHandler;
@@ -37,6 +38,7 @@ public abstract class AbstractCommand<C extends AbstractContext<C>, T extends Ab
     private final String usage;
     private final boolean guildOnly;
     private volatile ParentReference<C, T> parent;
+    private volatile boolean loggedNoMatches = false;
 
     public AbstractCommand(MapFactory mapFactory, ListFactory listFactory) {
         this.subcommands = mapFactory.create();
@@ -202,7 +204,11 @@ public abstract class AbstractCommand<C extends AbstractContext<C>, T extends Ab
         return subcommand;
     }
 
-    public abstract void process(C context);
+    public void noMatches(@Nonnull C context) {
+        if(loggedNoMatches) return;
+        loggedNoMatches = true;
+        LoggerFactory.getLogger(getClass()).warn("No command declaration matched. Override noMatches() to handle this case.");
+    }
 
     @SuppressWarnings("unchecked")
     private static <C extends AbstractContext<C>, T extends AbstractCommand<C, T>> T cast(AbstractCommand<C, ?> command) {

@@ -7,14 +7,12 @@ import sox.Sox;
 import sox.autoregister.AutoRegister;
 import sox.command.ContextKey;
 import sox.command.catnip.PrefixProvider;
-import sox.command.dispatch.DynamicCommandDispatcher;
 
 public class Bot {
     private static final ContextKey<Long> START_TIME = new ContextKey<>(Long.class, 0L);
 
     public static void main(String[] args) {
         Sox sox = new CatnipSoxBuilder()
-                .commandDispatcher(new DynamicCommandDispatcher())
                 .prefix(PrefixProvider.startingWith("!"))
                 .commandFilter((context, command) -> {
                     if(command.meta("owner") != null) {

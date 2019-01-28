@@ -46,7 +46,7 @@ class DispatchMetadata {
         boolean handle(AbstractCommand<?, ?> command, AbstractContext<?> context) {
             Object[] array = new Object[parsers.length];
             for(int i = 0; i < parsers.length; i++) {
-                Optional<?> optional = parsers[i].parse(context);
+                Optional<?> optional = context.tryArgument(parsers[i]);
                 if(!optional.isPresent()) {
                     return false;
                 }

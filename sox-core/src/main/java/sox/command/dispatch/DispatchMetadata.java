@@ -36,16 +36,25 @@ class DispatchMetadata {
 
     private static class Handler {
         private final Method method;
+        private final Class<?>[] parameterTypes;
         private final Parser<?>[] parsers;
 
         private Handler(Method method, Parser<?>[] parsers) {
             this.method = method;
+            this.parameterTypes = method.getParameterTypes();
             this.parsers = parsers;
         }
 
         boolean handle(AbstractCommand<?, ?> command, AbstractContext<?> context) {
             Object[] array = new Object[parsers.length];
             for(int i = 0; i < parsers.length; i++) {
+                //allow context to be passed when no arguments are provided
+                //which would cause tryArgument to always return an empty optional,
+                //even if the parser doesn't actually need any (just returns the context)
+                if(AbstractContext.class.isAssignableFrom(parameterTypes[i])) {
+                    array[i] = context;
+                    continue;
+                }
                 Optional<?> optional = context.tryArgument(parsers[i]);
                 if(!optional.isPresent()) {
                     return false;

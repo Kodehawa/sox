@@ -1,6 +1,5 @@
 package sox.command.dispatch;
 
-import sox.command.AbstractContext;
 import sox.command.argument.Parser;
 import sox.command.argument.Parsers;
 import sox.command.dispatch.config.AllowedProtocols;
@@ -105,16 +104,6 @@ public class ParserRegistry {
         add((__, type, annotations) -> {
             if(type instanceof Class && ((Class)type).isEnum()) {
                 return Parsers.toEnum((Class<? extends Enum>)type, has(annotations, IgnoreCase.class));
-            }
-            return null;
-        });
-        add((__, type, annotations) -> {
-            if(type instanceof Class && AbstractContext.class.isAssignableFrom(((Class)type))) {
-                return (c, ___) -> Optional.of(c);
-            }
-            if(type instanceof ParameterizedType &&
-                    AbstractContext.class.isAssignableFrom((Class)((ParameterizedType)type).getRawType())) {
-                return (c, ___) -> Optional.of(c);
             }
             return null;
         });

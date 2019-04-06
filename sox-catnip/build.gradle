@@ -5,5 +5,5 @@ repositories {
 
 dependencies {
     compile project(':sox-core')
-    compile 'com.github.mewna:catnip:0cc7487'
+    compile 'com.mewna:catnip:1.1.0'
 }
